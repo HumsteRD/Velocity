@@ -2,7 +2,7 @@
 
 Разовый разбор игрового ПК: найти проблемы, замерить, исправить, замерить снова и получить отчёт. Каждое изменение объясняется и откатывается.
 
-[![скачать](https://img.shields.io/badge/Скачать-velocity--setup--0.4.0.exe-28E0B0?style=for-the-badge)](https://github.com/HumsteRD/Velocity/releases/latest/download/velocity-setup-0.4.0.exe)
+[![скачать](https://img.shields.io/badge/Скачать-последний_релиз-28E0B0?style=for-the-badge)](https://github.com/HumsteRD/Velocity/releases/latest)
 
 ![версия](https://img.shields.io/badge/версия-0.4.0-28E0B0) ![платформа](https://img.shields.io/badge/платформа-Windows%2010%2F11-informational) ![.NET](https://img.shields.io/badge/.NET-9-512BD4) [![релизы](https://img.shields.io/github/downloads/HumsteRD/Velocity/total?label=скачиваний&color=28E0B0)](https://github.com/HumsteRD/Velocity/releases)
 
@@ -109,7 +109,7 @@
 
 ## Установка
 
-**[Скачать установщик](https://github.com/HumsteRD/Velocity/releases/latest/download/velocity-setup-0.4.0.exe)** (52 МБ) и запустить. Программа ставится **без запроса прав администратора** — права запрашиваются отдельно и только в момент, когда пользователь применяет настройки, которым они действительно нужны.
+**[Скачать установщик](https://github.com/HumsteRD/Velocity/releases/latest)** — файл `velocity-setup-<версия>.exe` в разделе Assets последнего релиза (около 52 МБ) — и запустить. Программа ставится **без запроса прав администратора** — права запрашиваются отдельно и только в момент, когда пользователь применяет настройки, которым они действительно нужны.
 
 .NET устанавливать не надо, всё уже внутри. Требуется Windows 10 версии 2004 или новее, 64 бита.
 
@@ -118,7 +118,7 @@
 Проверить, что файл не подменён по дороге:
 
 ```
-CertUtil -hashfile velocity-setup-0.4.0.exe SHA256
+CertUtil -hashfile velocity-setup-<версия>.exe SHA256
 ```
 
 ```
