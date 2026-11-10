@@ -1,4 +1,4 @@
-; Установщик VELOCITY
+﻿; Установщик VELOCITY
 ;
 ; Ставим в папку пользователя, а не в Program Files: установка тогда проходит
 ; вообще без запроса прав администратора. Сама программа запрашивает повышение
@@ -6,7 +6,10 @@
 ; которым права действительно нужны.
 
 #define AppName "VELOCITY"
-#define AppVersion "0.3.0"
+; Версию можно передать при сборке: ISCC /DAppVersion=0.4.0 velocity.iss
+#ifndef AppVersion
+  #define AppVersion "0.4.0"
+#endif
 #define AppPublisher "VELOCITY"
 #define AppExeName "Velocity.exe"
 
