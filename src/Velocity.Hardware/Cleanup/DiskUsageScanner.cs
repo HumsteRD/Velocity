@@ -84,7 +84,7 @@ public sealed class DiskUsageScanner
         {
             results.Add(new DiskUsageEntry
             {
-                Name = "Файлы в корне диска",
+                Name = L10n.T("Файлы в корне диска"),
                 Path = root,
                 SizeBytes = rootFiles
             });

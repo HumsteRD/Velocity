@@ -4,13 +4,14 @@
     "Category": "Power",
     "Title": "Схема питания «Максимальная производительность»",
     "Description": "Скрытая схема питания Windows без парковки ядер и без переходов энергосостояний. На настольном ПК убирает микрозадержки при резком росте нагрузки — ровно то, что происходит при входе в бой.",
-    "Effect": "Создаётся и активируется схема Ultimate Performance",
+    "Effect": "Создаётся копия скрытой схемы Ultimate Performance и становится активной",
     "ExpectedGain": "На системах со схемой «Экономия энергии» до +30% FPS, со «Сбалансированной» — единицы процентов",
     "Risk": "Moderate",
     "Confidence": "Documented",
     "RequiresElevation": true,
     "Requires": [
-      "machine.is_laptop=false"
+      "machine.is_laptop=false",
+      "cpu.x3d_dual_ccd=false"
     ],
     "Presets": [
       "Gaming",
@@ -21,18 +22,19 @@
     "Detect": {
       "type": "powercfg",
       "Operation": "activate",
-      "SchemeGuid": "e9a42b02-d5df-448d-aa00-03f14749eb61"
+      "SchemeGuid": "af1d5722-ef22-48b2-aaea-fc462c891d21"
     },
     "Apply": [
       {
         "type": "powercfg",
         "Operation": "duplicate",
-        "SchemeGuid": "e9a42b02-d5df-448d-aa00-03f14749eb61"
+        "SchemeGuid": "e9a42b02-d5df-448d-aa00-03f14749eb61",
+        "TargetGuid": "af1d5722-ef22-48b2-aaea-fc462c891d21"
       },
       {
         "type": "powercfg",
         "Operation": "activate",
-        "SchemeGuid": "e9a42b02-d5df-448d-aa00-03f14749eb61"
+        "SchemeGuid": "af1d5722-ef22-48b2-aaea-fc462c891d21"
       }
     ]
   },
@@ -47,7 +49,8 @@
     "Confidence": "Documented",
     "RequiresElevation": true,
     "Requires": [
-      "machine.is_laptop=false"
+      "machine.is_laptop=false",
+      "cpu.x3d_dual_ccd=false"
     ],
     "Presets": [
       "Gaming",

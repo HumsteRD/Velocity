@@ -1,0 +1,61 @@
+[
+  {
+    "Id": "game.cpu_priority_high",
+    "Category": "Game",
+    "Title": "Высокий приоритет процесса для соревновательных игр",
+    "Description": "Windows запускает игры с обычным приоритетом — наравне с браузером, Discord и обновлениями. Параметр PerfOptions в разделе Image File Execution Options говорит системе сразу запускать указанные игры с высоким приоритетом процессора. Это штатный механизм Windows: в процесс игры ничего не внедряется.\n\nВыигрыш появляется, когда процессор занят и чем-то ещё: стрим, браузер с видео, голосовой чат. На свободном процессоре разницы нет. Приоритет «реального времени» не используется — он может заморозить систему.",
+    "Effect": "CpuPriorityClass = 3 (высокий) для CS2, Valorant, Fortnite и Apex Legends",
+    "ExpectedGain": "Выше 1% low при фоновой нагрузке на процессор. На свободной системе — без изменений",
+    "Risk": "Moderate",
+    "Confidence": "Community",
+    "RequiresElevation": true,
+    "DetectAll": true,
+    "Presets": [
+      "Competitive",
+      "Maximum",
+      "Extreme"
+    ],
+    "Apply": [
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\cs2.exe\\PerfOptions",
+        "Name": "CpuPriorityClass",
+        "Kind": "dword",
+        "Value": "3"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\VALORANT-Win64-Shipping.exe\\PerfOptions",
+        "Name": "CpuPriorityClass",
+        "Kind": "dword",
+        "Value": "3"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\FortniteClient-Win64-Shipping.exe\\PerfOptions",
+        "Name": "CpuPriorityClass",
+        "Kind": "dword",
+        "Value": "3"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\r5apex.exe\\PerfOptions",
+        "Name": "CpuPriorityClass",
+        "Kind": "dword",
+        "Value": "3"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Microsoft\\Windows NT\\CurrentVersion\\Image File Execution Options\\r5apex_dx12.exe\\PerfOptions",
+        "Name": "CpuPriorityClass",
+        "Kind": "dword",
+        "Value": "3"
+      }
+    ]
+  }
+]

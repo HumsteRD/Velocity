@@ -1,17 +1,25 @@
-# Сборка
-bin/
-obj/
-dist/
+# Build output
+[Bb]in/
+[Oo]bj/
+artifacts/
+TestResults/
 dist-app/
-out/
-release/
+.tools/
 
-# Среды разработки
+# IDE and user-local state
 .vs/
 .idea/
 *.user
 *.suo
+*.userosscache
+*.sln.docstates
 
-# Временные файлы
-*.tmp
+# Packaged binaries belong in GitHub Releases, not in source control
+/velocity-setup-*.exe
+# Установленная копия программы, а не исходники
+/VELOCITY/
+
+# Local application diagnostics
+*.etl
 *.log
+coverage/

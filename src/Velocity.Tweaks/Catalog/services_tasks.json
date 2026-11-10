@@ -1,0 +1,152 @@
+[
+  {
+    "Id": "privacy.telemetry_tasks_off",
+    "Category": "Privacy",
+    "Title": "Отключить задачи телеметрии в планировщике",
+    "Description": "Помимо службы телеметрии Windows по расписанию запускает задачи, которые проверяют совместимость программ, собирают сведения об использовании USB и дисков и готовят отчёты об ошибках. Самая тяжёлая из них — Compatibility Appraiser: при запуске она заметно грузит процессор и диск и может попасть прямо на матч.\n\nЗадачи не удаляются, а выключаются: откат включит их обратно. Задач, которых в твоей сборке Windows нет, программа не касается.",
+    "Effect": "Задачи совместимости, CEIP, диагностики дисков, отзывов и отчётов об ошибках — выключены",
+    "ExpectedGain": "Не будет фоновых всплесков нагрузки от проверки совместимости и отчётов. Средний FPS не меняется",
+    "Risk": "Safe",
+    "Confidence": "Community",
+    "RequiresElevation": true,
+    "DetectAll": true,
+    "Presets": [
+      "Gaming",
+      "Competitive",
+      "Maximum",
+      "Extreme"
+    ],
+    "Apply": [
+      {
+        "type": "scheduled_task",
+        "Task": "\\Microsoft\\Windows\\Application Experience\\Microsoft Compatibility Appraiser",
+        "Enabled": false
+      },
+      {
+        "type": "scheduled_task",
+        "Task": "\\Microsoft\\Windows\\Application Experience\\Microsoft Compatibility Appraiser Exp",
+        "Enabled": false
+      },
+      {
+        "type": "scheduled_task",
+        "Task": "\\Microsoft\\Windows\\Application Experience\\ProgramDataUpdater",
+        "Enabled": false
+      },
+      {
+        "type": "scheduled_task",
+        "Task": "\\Microsoft\\Windows\\Application Experience\\MareBackup",
+        "Enabled": false
+      },
+      {
+        "type": "scheduled_task",
+        "Task": "\\Microsoft\\Windows\\Customer Experience Improvement Program\\Consolidator",
+        "Enabled": false
+      },
+      {
+        "type": "scheduled_task",
+        "Task": "\\Microsoft\\Windows\\Customer Experience Improvement Program\\UsbCeip",
+        "Enabled": false
+      },
+      {
+        "type": "scheduled_task",
+        "Task": "\\Microsoft\\Windows\\DiskDiagnostic\\Microsoft-Windows-DiskDiagnosticDataCollector",
+        "Enabled": false
+      },
+      {
+        "type": "scheduled_task",
+        "Task": "\\Microsoft\\Windows\\Feedback\\Siuf\\DmClient",
+        "Enabled": false
+      },
+      {
+        "type": "scheduled_task",
+        "Task": "\\Microsoft\\Windows\\Feedback\\Siuf\\DmClientOnScenarioDownload",
+        "Enabled": false
+      },
+      {
+        "type": "scheduled_task",
+        "Task": "\\Microsoft\\Windows\\Windows Error Reporting\\QueueReporting",
+        "Enabled": false
+      },
+      {
+        "type": "scheduled_task",
+        "Task": "\\Microsoft\\Windows\\Autochk\\Proxy",
+        "Enabled": false
+      }
+    ]
+  },
+  {
+    "Id": "privacy.dmwappush_off",
+    "Category": "Privacy",
+    "Title": "Отключить службу маршрутизации push-сообщений WAP",
+    "Description": "Служба dmwappushservice доставляет сообщения управления устройством и используется конвейером телеметрии. На домашнем компьютере, который не управляется организацией через MDM, она не нужна. Если компьютер рабочий и им управляет IT-отдел — не применяй.",
+    "Effect": "Служба dmwappushservice → отключена",
+    "ExpectedGain": "Меньше фоновой активности телеметрии. На FPS не влияет",
+    "Risk": "Moderate",
+    "Confidence": "Community",
+    "RequiresReboot": true,
+    "RequiresElevation": true,
+    "Presets": [
+      "Competitive",
+      "Maximum",
+      "Extreme"
+    ],
+    "Apply": [
+      {
+        "type": "service",
+        "Name": "dmwappushservice",
+        "StartMode": "disabled"
+      }
+    ]
+  },
+  {
+    "Id": "bg.maps_broker_off",
+    "Category": "Background",
+    "Title": "Отключить диспетчер скачанных карт",
+    "Description": "Служба MapsBroker стартует вместе с системой и обслуживает только приложение «Карты» Windows: обновляет офлайн-карты в фоне. Если ты не пользуешься «Картами», она просто занимает память и время при загрузке.",
+    "Effect": "Служба MapsBroker → отключена",
+    "ExpectedGain": "Чуть быстрее загрузка Windows и меньше фоновой активности",
+    "Risk": "Safe",
+    "Confidence": "Documented",
+    "RequiresElevation": true,
+    "Presets": [
+      "Gaming",
+      "Competitive",
+      "Maximum",
+      "Extreme"
+    ],
+    "Apply": [
+      {
+        "type": "service",
+        "Name": "MapsBroker",
+        "StartMode": "disabled"
+      }
+    ]
+  },
+  {
+    "Id": "bg.sysmain_off",
+    "Category": "Background",
+    "Title": "Отключить SysMain (SuperFetch) на системе с SSD",
+    "Description": "SysMain заранее подгружает в память программы, которые ты часто запускаешь. На жёстком диске это ускоряет запуск. На SSD выигрыш почти нулевой, а сама служба периодически читает диск и занимает память в фоне — иногда это совпадает с подгрузкой уровня в игре.\n\nЧестно: Microsoft считает службу полезной и на SSD, а эффект от отключения на быстрой системе небольшой. Если игры лежат на HDD — не применяй.",
+    "Effect": "Служба SysMain → отключена",
+    "ExpectedGain": "Меньше фоновых обращений к диску. На средний FPS не влияет, иногда сглаживает подгрузки",
+    "Risk": "Moderate",
+    "Confidence": "Community",
+    "RequiresReboot": true,
+    "RequiresElevation": true,
+    "Requires": [
+      "storage.system_ssd=true",
+      "storage.has_hdd=false"
+    ],
+    "Presets": [
+      "Maximum",
+      "Extreme"
+    ],
+    "Apply": [
+      {
+        "type": "service",
+        "Name": "SysMain",
+        "StartMode": "disabled"
+      }
+    ]
+  }
+]

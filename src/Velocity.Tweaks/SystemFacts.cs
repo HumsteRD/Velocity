@@ -37,6 +37,10 @@ public sealed class SystemFacts
         f.Set("cpu.l3_domains", r.Cpu.L3Domains);
         f.Set("cpu.is_x3d", r.Cpu.IsAsymmetricCache || (r.Cpu.Name?.Contains("X3D", StringComparison.OrdinalIgnoreCase) ?? false));
         f.Set("cpu.name", r.Cpu.Name);
+        // Ryzen X3D с двумя чиплетами (7900X3D, 7950X3D, 9900X3D, 9950X3D): игру на кэш-чиплет
+        // переносит драйвер чипсета через парковку ядер, и ему нужна «Сбалансированная» схема.
+        bool x3d = r.Cpu.IsAsymmetricCache || (r.Cpu.Name?.Contains("X3D", StringComparison.OrdinalIgnoreCase) ?? false);
+        f.Set("cpu.x3d_dual_ccd", x3d && r.Cpu.L3Domains >= 2);
 
         var gpu = r.Gpus.FirstOrDefault(g => !g.IsIntegrated) ?? r.Gpus.FirstOrDefault();
         f.Set("gpu.vendor", gpu?.Vendor.ToString().ToLowerInvariant() ?? "unknown");
@@ -65,6 +69,49 @@ public sealed class SystemFacts
         f.Set("tuning.anticheat_active", r.Tuning.ActiveAntiCheats.Count > 0);
 
         f.Set("games.count", r.Games.Count);
+
+        // ── Для руководств и сетевых правил ──
+        var physicalNet = r.Network.Where(n => n.Kind is NetworkKind.Ethernet or NetworkKind.WiFi).ToList();
+        f.Set("network.has_wifi", physicalNet.Any(n => n.Kind == NetworkKind.WiFi));
+        f.Set("network.has_ethernet", physicalNet.Any(n => n.Kind == NetworkKind.Ethernet));
+        f.Set("network.wifi_active", physicalNet.Any(n => n.Kind == NetworkKind.WiFi && n.Connected));
+        f.Set("network.ethernet_active", physicalNet.Any(n => n.Kind == NetworkKind.Ethernet && n.Connected));
+        f.Set("network.nagle_off", physicalNet.Any(n => n.NagleDisabled == true));
+
+        var systemDrive = r.Storage.FirstOrDefault(s => s.IsSystemDrive);
+        if (systemDrive is not null)
+            f.Set("storage.system_ssd", systemDrive.Kind is StorageKind.Ssd or StorageKind.Nvme);
+
+        // Логических ядер вдвое больше физических — значит, Hyper-Threading / SMT включён.
+        if (r.Cpu.PhysicalCores > 0 && r.Cpu.LogicalCores > 0)
+            f.Set("cpu.smt_enabled", r.Cpu.LogicalCores > r.Cpu.PhysicalCores);
+        f.Set("cpu.virtualization", r.Cpu.VirtualizationEnabled);
+        f.Set("print.physical_printers", Actions.Printers.PhysicalCount());
+
+        f.Set("bios.vendor", r.Machine.BiosVendor);
+        f.Set("bios.version", r.Machine.BiosVersion);
+        if (r.Machine.BiosDate is { } biosDate)
+        {
+            f.Set("bios.age_days", (int)(DateTime.Now - biosDate).TotalDays);
+            f.Set("bios.date", biosDate.ToString("dd.MM.yyyy", CultureInfo.InvariantCulture));
+        }
+
+        f.Set("ram.rated_speed", r.Memory.RatedSpeedMhz);
+        // Нижняя («почти наверняка») граница находки «XMP выключен» из FindingsEngine:
+        // частота не выше базовой JEDEC. Верхнюю ступень JEDEC сюда не берём —
+        // на ней бывают честные комплекты без разгонного профиля.
+        int jedecTop = r.Memory.Kind switch
+        {
+            MemoryKind.Ddr4 => 2400,
+            MemoryKind.Ddr5 => 4800,
+            MemoryKind.Ddr3 => 1333,
+            _ => 0
+        };
+        if (jedecTop > 0 && r.Memory.ConfiguredSpeedMhz > 0)
+            f.Set("ram.xmp_off_likely", r.Memory.ConfiguredSpeedMhz <= jedecTop);
+
+        f.Set("timer.resolution_ms", r.Tuning.CurrentTimerResolutionMs ?? 0);
+        f.Set("tuning.global_timer", r.Tuning.GlobalTimerResolutionRequests);
 
         return f;
     }

@@ -8,8 +8,17 @@
     "ExpectedGain": "Обычно +5–15% FPS, на встроенной графике заметно больше",
     "Risk": "Moderate",
     "Confidence": "Measured",
-    "Presets": ["Safe", "Gaming", "Competitive", "Maximum", "Extreme"],
-    "Requires": ["machine.is_laptop=false"],
+    "Presets": [
+      "Safe",
+      "Gaming",
+      "Competitive",
+      "Maximum",
+      "Extreme"
+    ],
+    "Requires": [
+      "machine.is_laptop=false",
+      "ram.xmp_off_likely=true"
+    ],
     "ManualSteps": [
       "Выключи компьютер полностью, затем включи и сразу нажимай Delete. На платах ASUS, MSI и Gigabyte это Delete, на некоторых ноутбуках и платах — F2.",
       "Найди переключатель профиля памяти. У Gigabyte он называется XMP или EXPO и лежит на главном экране режима Easy Mode, либо в разделе Tweaker. У ASUS — AI Tweaker, у MSI — OC, у ASRock — OC Tweaker.",
@@ -28,8 +37,17 @@
     "ExpectedGain": "Обычно +5–15% FPS, на встроенной графике до +30%",
     "Risk": "Moderate",
     "Confidence": "Measured",
-    "Presets": ["Safe", "Gaming", "Competitive", "Maximum", "Extreme"],
-    "Requires": ["machine.is_laptop=false", "ram.channels=1"],
+    "Presets": [
+      "Safe",
+      "Gaming",
+      "Competitive",
+      "Maximum",
+      "Extreme"
+    ],
+    "Requires": [
+      "machine.is_laptop=false",
+      "ram.channels=1"
+    ],
     "ManualSteps": [
       "Выключи компьютер и вынь кабель питания из блока. Подожди полминуты.",
       "Открой боковую крышку корпуса и найди планки памяти рядом с процессором.",
@@ -48,8 +66,14 @@
     "ExpectedGain": "От нуля до +10% в зависимости от игры. Стоит замерить",
     "Risk": "Moderate",
     "Confidence": "Documented",
-    "Presets": ["Maximum", "Extreme"],
-    "Requires": ["machine.is_laptop=false", "gpu.vendor!=intel"],
+    "Presets": [
+      "Maximum",
+      "Extreme"
+    ],
+    "Requires": [
+      "machine.is_laptop=false",
+      "gpu.vendor!=intel"
+    ],
     "ManualSteps": [
       "Зайди в BIOS: выключи компьютер, включи и сразу нажимай Delete.",
       "Переключись в расширенный режим — обычно клавиша F7.",
@@ -69,7 +93,13 @@
     "ExpectedGain": "Плавность картинки вплоть до кратной разницы",
     "Risk": "Safe",
     "Confidence": "Documented",
-    "Presets": ["Safe", "Gaming", "Competitive", "Maximum", "Extreme"],
+    "Presets": [
+      "Safe",
+      "Gaming",
+      "Competitive",
+      "Maximum",
+      "Extreme"
+    ],
     "ManualSteps": [
       "Посмотри, каким кабелем монитор подключён к видеокарте.",
       "DisplayPort — лучший вариант, он тянет высокие частоты без оговорок. Если такой разъём есть на мониторе и на видеокарте, используй его.",
@@ -77,6 +107,9 @@
       "DVI и VGA для высоких частот не годятся, VGA к тому же аналоговый и мылит картинку.",
       "Кабель подключай в разъём видеокарты, а не материнской платы. Разъёмы платы идут от встроенного видеоядра процессора, и дискретная карта в этом случае почти не используется.",
       "После замены кабеля вернись в программу, нажми «Пересканировать» и применяй настройку «Максимальная частота обновления монитора»."
+    ],
+    "Requires": [
+      "display.max_hz<=75"
     ]
   }
 ]

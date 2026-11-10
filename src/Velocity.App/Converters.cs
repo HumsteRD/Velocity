@@ -28,9 +28,9 @@ public sealed class SeverityLabelConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) => value switch
     {
-        FindingSeverity.Critical => "КРИТИЧНО",
-        FindingSeverity.Warning => "ВАЖНО",
-        _ => "К СВЕДЕНИЮ"
+        FindingSeverity.Critical => Loc.T("Критично"),
+        FindingSeverity.Warning => Loc.T("Важно"),
+        _ => Loc.T("К сведению")
     };
 
     public object ConvertBack(object? value, Type t, object? p, CultureInfo c) => Binding.DoNothing;
@@ -40,10 +40,10 @@ public sealed class RiskLabelConverter : IValueConverter
 {
     public object Convert(object? value, Type targetType, object? parameter, CultureInfo culture) => value switch
     {
-        TweakRisk.Safe => "безопасно",
-        TweakRisk.Moderate => "умеренно",
-        TweakRisk.Advanced => "продвинуто",
-        TweakRisk.Expert => "с риском",
+        TweakRisk.Safe => Loc.T("безопасно"),
+        TweakRisk.Moderate => Loc.T("умеренно"),
+        TweakRisk.Advanced => Loc.T("продвинуто"),
+        TweakRisk.Expert => Loc.T("с риском"),
         _ => ""
     };
 

@@ -19,6 +19,7 @@
   <ItemGroup>
     <EmbeddedResource Include="Catalog\*.json" />
     <EmbeddedResource Include="GameProfiles\*.json" />
+    <EmbeddedResource Include="Guides\*.json" />
   </ItemGroup>
 
 </Project>

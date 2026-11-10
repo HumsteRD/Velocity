@@ -1,3 +1,4 @@
+using Velocity.Core;
 namespace Velocity.Hardware.Cleanup;
 
 /// <summary>Насколько безопасно удалять эту категорию.</summary>
@@ -20,7 +21,9 @@ public enum CleanupKind
     Logs,
     RecycleBin,
     Launchers,
-    CrashDumps
+    CrashDumps,
+    Browsers,
+    Apps
 }
 
 /// <summary>
@@ -63,10 +66,10 @@ public sealed class CleanupFinding
 
     public string SizeText => SizeBytes switch
     {
-        >= 1024L * 1024 * 1024 => $"{SizeGb} ГБ",
-        >= 1024L * 1024 => $"{SizeMb} МБ",
-        >= 1024 => $"{SizeBytes / 1024} КБ",
-        _ => $"{SizeBytes} Б"
+        >= 1024L * 1024 * 1024 => L10n.F("{0} ГБ", SizeGb),
+        >= 1024L * 1024 => L10n.F("{0} МБ", SizeMb),
+        >= 1024 => L10n.F("{0} КБ", SizeBytes / 1024),
+        _ => L10n.F("{0} Б", SizeBytes)
     };
 }
 

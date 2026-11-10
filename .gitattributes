@@ -1,0 +1,5 @@
+* text=auto eol=crlf
+
+*.ico binary
+*.exe binary
+*.dat binary

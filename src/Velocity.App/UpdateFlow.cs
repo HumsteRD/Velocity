@@ -45,11 +45,11 @@ public static class UpdateFlow
         var notes = Summarize(update.Notes);
 
         var answer = MessageBox.Show(
-            $"Доступна версия {update.Version}. Установлена {Updater.CurrentVersion}." +
+            Loc.F("Доступна версия {0}. Установлена {1}.", update.Version, Updater.CurrentVersion) +
             $"{Environment.NewLine}{Environment.NewLine}{notes}" +
-            $"{Environment.NewLine}{Environment.NewLine}Размер загрузки: {sizeMb} МБ." +
-            $"{Environment.NewLine}{Environment.NewLine}Скачать и установить?",
-            "Доступно обновление", MessageBoxButton.YesNo, MessageBoxImage.Information);
+            Loc.F("{0}{1}Размер загрузки: {2} МБ.", Environment.NewLine, Environment.NewLine, sizeMb) +
+            Loc.F("{0}{1}Скачать и установить?", Environment.NewLine, Environment.NewLine),
+            Loc.T("Доступно обновление"), MessageBoxButton.YesNo, MessageBoxImage.Information);
 
         if (answer != MessageBoxResult.Yes)
         {
@@ -70,20 +70,20 @@ public static class UpdateFlow
         try
         {
             var progress = new Progress<double>(fraction =>
-                main?.SetStatus($"Загрузка обновления: {fraction * 100:0}%"));
+                main?.SetStatus(Loc.F("Загрузка обновления: {0:0}%", fraction * 100)));
 
-            main?.SetStatus("Загрузка обновления…");
+            main?.SetStatus(Loc.T("Загрузка обновления…"));
             var installer = await Updater.DownloadAsync(update, progress);
 
-            main?.SetStatus("Обновление загружено");
+            main?.SetStatus(Loc.T("Обновление загружено"));
 
             var answer = MessageBox.Show(
-                $"Версия {update.Version} загружена." +
+                Loc.F("Версия {0} загружена.", update.Version) +
                 $"{Environment.NewLine}{Environment.NewLine}" +
-                "Программа закроется, установится обновление и запустится снова. " +
-                "Применённые настройки и точки отката сохранятся." +
-                $"{Environment.NewLine}{Environment.NewLine}Установить сейчас?",
-                "Готово к установке", MessageBoxButton.YesNo, MessageBoxImage.Question);
+                Loc.T("Программа закроется, установится обновление и запустится снова. ") +
+                Loc.T("Применённые настройки и точки отката сохранятся.") +
+                Loc.F("{0}{1}Установить сейчас?", Environment.NewLine, Environment.NewLine),
+                Loc.T("Готово к установке"), MessageBoxButton.YesNo, MessageBoxImage.Question);
 
             if (answer == MessageBoxResult.Yes)
             {
@@ -91,18 +91,18 @@ public static class UpdateFlow
                 return;
             }
 
-            main?.SetStatus("Обновление загружено и ждёт установки");
+            main?.SetStatus(Loc.T("Обновление загружено и ждёт установки"));
         }
         catch (Exception ex)
         {
             MessageBox.Show(
-                $"Не удалось загрузить обновление: {ex.Message}" +
+                Loc.F("Не удалось загрузить обновление: {0}", ex.Message) +
                 $"{Environment.NewLine}{Environment.NewLine}" +
-                "Скачанная часть сохранена — следующая попытка продолжит с того же места. " +
-                $"Можно скачать установщик вручную: {update.PageUrl}",
-                "Ошибка загрузки", MessageBoxButton.OK, MessageBoxImage.Warning);
+                Loc.T("Скачанная часть сохранена — следующая попытка продолжит с того же места. ") +
+                Loc.F("Можно скачать установщик вручную: {0}", update.PageUrl),
+                Loc.T("Ошибка загрузки"), MessageBoxButton.OK, MessageBoxImage.Warning);
 
-            main?.SetStatus("Загрузка обновления не удалась");
+            main?.SetStatus(Loc.T("Загрузка обновления не удалась"));
         }
         finally
         {
@@ -125,6 +125,6 @@ public static class UpdateFlow
 
         return lines.Count > 0
             ? string.Join(Environment.NewLine, lines)
-            : "Описание изменений доступно на странице релиза.";
+            : Loc.T("Описание изменений доступно на странице релиза.");
     }
 }

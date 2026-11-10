@@ -1,3 +1,4 @@
+using Velocity.Core;
 using System.IO.Enumeration;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
@@ -18,7 +19,11 @@ public sealed record CleanupResult(string TargetId, long FreedBytes, int Deleted
 [SupportedOSPlatform("windows")]
 public sealed class CleanupScanner
 {
-    public List<CleanupFinding> Scan(IProgress<string>? progress = null)
+    /// <param name="driveRoot">
+    /// Только этот диск («D:\»). Удаляются ровно те папки, что попали в находку,
+    /// поэтому фильтр по диску защищает и от удаления на другом диске.
+    /// </param>
+    public List<CleanupFinding> Scan(IProgress<string>? progress = null, string? driveRoot = null)
     {
         var findings = new List<CleanupFinding>();
         var seen = new HashSet<string>(StringComparer.OrdinalIgnoreCase);
@@ -34,6 +39,8 @@ public sealed class CleanupScanner
 
                 // Один и тот же путь не должен попасть в две категории и посчитаться дважды.
                 if (!seen.Add(path)) continue;
+                if (driveRoot is not null && !string.Equals(Path.GetPathRoot(path), driveRoot, StringComparison.OrdinalIgnoreCase))
+                    continue;
                 if (!Directory.Exists(path)) continue;
 
                 try
@@ -117,7 +124,7 @@ public sealed class CleanupScanner
             // Подстраховка: удаляем только по путям из каталога, заново их проверяя.
             if (!IsAllowed(path))
             {
-                errors.Add($"{path}: путь не входит в список разрешённых");
+                errors.Add(L10n.F("{0}: путь не входит в список разрешённых", path));
                 continue;
             }
 

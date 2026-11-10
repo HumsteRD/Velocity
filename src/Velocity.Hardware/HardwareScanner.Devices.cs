@@ -481,8 +481,8 @@ public sealed partial class HardwareScanner
         ["1532"] = "Razer",
         ["1038"] = "SteelSeries",
         ["1B1C"] = "Corsair",
-        ["04D9"] = "Holtek (Glorious / китайские OEM)",
-        ["3151"] = "Compx (Ajazz / VGN / Attack Shark и др.)",
+        ["04D9"] = L10n.T("Holtek (Glorious / китайские OEM)"),
+        ["3151"] = L10n.T("Compx (Ajazz / VGN / Attack Shark и др.)"),
         ["3554"] = "Pulsar",
         ["258A"] = "SINOWEALTH (Glorious / VGN / Ajazz)",
         ["0B05"] = "ASUS",
@@ -512,7 +512,7 @@ public sealed partial class HardwareScanner
         ["eadesktop"] = "EA Desktop",
         ["ubisoft"] = "Ubisoft Connect",
         ["battle.net"] = "Battle.net",
-        ["adobe"] = "Adobe (обновлятор)",
+        ["adobe"] = L10n.T("Adobe (обновлятор)"),
         ["onedrive"] = "OneDrive",
         ["teams"] = "Microsoft Teams",
         ["cortana"] = "Cortana"
@@ -702,24 +702,24 @@ public sealed partial class HardwareScanner
         var found = new List<string>();
 
         if (t.SystemResponsiveness == 0)
-            found.Add("SystemResponsiveness = 0 — душит аудиопоток, возможен треск звука. Норма: 10");
+            found.Add(L10n.T("SystemResponsiveness = 0 — душит аудиопоток, возможен треск звука. Норма: 10"));
 
         if (Reg.Flag(RegistryHive.LocalMachine,
                 @"SOFTWARE\Policies\Microsoft\Windows Defender", "DisableAntiSpyware") == true)
-            found.Add("Defender отключён через политику — вместо этого нужны исключения папок игр");
+            found.Add(L10n.T("Defender отключён через политику — вместо этого нужны исключения папок игр"));
 
         if (Reg.Int(RegistryHive.LocalMachine,
                 @"SYSTEM\CurrentControlSet\Control\PriorityControl", "Win32PrioritySeparation") is { } prio
             && prio is not (2 or 26 or 38))
-            found.Add($"Win32PrioritySeparation = {prio} — нестандартное значение, обычно из .bat-пака. Норма: 2 или 38");
+            found.Add(L10n.F("Win32PrioritySeparation = {0} — нестандартное значение, обычно из .bat-пака. Норма: 2 или 38", prio));
 
         if (Reg.Int(RegistryHive.LocalMachine,
                 @"SYSTEM\CurrentControlSet\Control\Session Manager\Memory Management", "DisablePagingExecutive") == 1)
-            found.Add("DisablePagingExecutive = 1 — карго-культ, на FPS не влияет, память расходуется хуже");
+            found.Add(L10n.T("DisablePagingExecutive = 1 — карго-культ, на FPS не влияет, память расходуется хуже"));
 
         if (Reg.Str(RegistryHive.LocalMachine,
                 @"SYSTEM\CurrentControlSet\Services\Ndu", "Start") == "4")
-            found.Add("Служба Ndu отключена — ломает мониторинг сети в диспетчере задач, эффекта на FPS нет");
+            found.Add(L10n.T("Служба Ndu отключена — ломает мониторинг сети в диспетчере задач, эффекта на FPS нет"));
 
         return found;
     }

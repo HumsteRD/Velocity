@@ -1,0 +1,135 @@
+[
+  {
+    "Id": "privacy.required_diagnostics",
+    "Category": "Privacy",
+    "Title": "Ограничить диагностику обязательным уровнем",
+    "Description": "Windows 11 различает обязательные и необязательные диагностические данные. Эта политика оставляет только обязательный уровень, необходимый для обновлений, безопасности и базовой надёжности. На редакциях Pro и Home полное отключение этим параметром не поддерживается.",
+    "Effect": "AllowTelemetry = 1 (Required diagnostic data)",
+    "ExpectedGain": "Меньше необязательной передачи диагностических данных",
+    "Risk": "Moderate",
+    "Confidence": "Documented",
+    "RequiresElevation": true,
+    "Presets": ["Safe", "Gaming", "Competitive", "Maximum", "Extreme", "Laptop"],
+    "Detect": {
+      "type": "registry",
+      "Hive": "HKLM",
+      "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\DataCollection",
+      "Name": "AllowTelemetry",
+      "Expected": "1"
+    },
+    "Apply": [
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\DataCollection",
+        "Name": "AllowTelemetry",
+        "Kind": "dword",
+        "Value": "1"
+      }
+    ],
+    "Sources": [
+      "https://learn.microsoft.com/windows/privacy/configure-windows-diagnostic-data-in-your-organization"
+    ]
+  },
+  {
+    "Id": "privacy.advertising_id_off",
+    "Category": "Privacy",
+    "Title": "Отключить рекламный идентификатор Windows",
+    "Description": "Запрещает Windows и приложениям использовать рекламный идентификатор для персонализированного контента. Политика устанавливается для устройства, а не только для одной учётной записи.",
+    "Effect": "Advertising ID выключен политикой",
+    "ExpectedGain": "Меньше межприложного рекламного профилирования",
+    "Risk": "Safe",
+    "Confidence": "Documented",
+    "RequiresElevation": true,
+    "Presets": ["Safe", "Gaming", "Competitive", "Maximum", "Extreme", "Laptop"],
+    "Detect": {
+      "type": "registry",
+      "Hive": "HKLM",
+      "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\AdvertisingInfo",
+      "Name": "DisabledByGroupPolicy",
+      "Expected": "1"
+    },
+    "Apply": [
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\AdvertisingInfo",
+        "Name": "Enabled",
+        "Kind": "dword",
+        "Value": "0"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\AdvertisingInfo",
+        "Name": "DisabledByGroupPolicy",
+        "Kind": "dword",
+        "Value": "1"
+      }
+    ],
+    "Sources": [
+      "https://learn.microsoft.com/windows/privacy/manage-connections-from-windows-operating-system-components-to-microsoft-services"
+    ]
+  },
+  {
+    "Id": "privacy.activity_upload_off",
+    "Category": "Privacy",
+    "Title": "Запретить выгрузку истории действий",
+    "Description": "История действий может публиковаться локально, но эта политика запрещает отправлять опубликованные действия в облако. Локальные записи не удаляются: для этого нужна отдельная очистка истории.",
+    "Effect": "UploadUserActivities = 0",
+    "ExpectedGain": "История действий не выгружается в облако",
+    "Risk": "Safe",
+    "Confidence": "Documented",
+    "RequiresElevation": true,
+    "Requires": ["os.build>=17134"],
+    "Presets": ["Safe", "Gaming", "Competitive", "Maximum", "Extreme", "Laptop"],
+    "Detect": {
+      "type": "registry",
+      "Hive": "HKLM",
+      "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\System",
+      "Name": "UploadUserActivities",
+      "Expected": "0"
+    },
+    "Apply": [
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\System",
+        "Name": "UploadUserActivities",
+        "Kind": "dword",
+        "Value": "0"
+      }
+    ],
+    "Sources": [
+      "https://learn.microsoft.com/windows/client-management/mdm/policy-csp-privacy#uploaduseractivities"
+    ]
+  },
+  {
+    "Id": "privacy.diagtrack_off",
+    "Category": "Privacy",
+    "Title": "Отключить службу Connected User Experiences and Telemetry",
+    "Description": "Переводит службу DiagTrack в Disabled. Microsoft описывает её как компонент для связанных пользовательских возможностей и сбора диагностических данных. Изменение вступает в силу после перезагрузки и может ограничить отдельные связанные функции Windows.",
+    "Effect": "DiagTrack: Disabled после перезагрузки",
+    "ExpectedGain": "Служба не запускается вместе с Windows",
+    "Risk": "Advanced",
+    "Confidence": "Documented",
+    "RequiresElevation": true,
+    "RequiresReboot": true,
+    "Presets": ["Competitive", "Maximum", "Extreme"],
+    "Detect": {
+      "type": "service",
+      "Name": "DiagTrack",
+      "StartMode": "disabled"
+    },
+    "Apply": [
+      {
+        "type": "service",
+        "Name": "DiagTrack",
+        "StartMode": "disabled"
+      }
+    ],
+    "Sources": [
+      "https://learn.microsoft.com/windows-server/security/windows-services/security-guidelines-for-disabling-system-services-in-windows-server"
+    ]
+  }
+]

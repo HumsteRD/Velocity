@@ -1,0 +1,245 @@
+[
+  {
+    "Id": "win.legacy_features_off",
+    "Category": "Windows",
+    "Risk": "Moderate",
+    "Confidence": "Documented",
+    "RequiresReboot": true,
+    "RequiresElevation": true,
+    "DetectAll": true,
+    "Presets": [
+      "Competitive",
+      "Maximum",
+      "Extreme"
+    ],
+    "Title": "Отключить устаревшие компоненты Windows",
+    "Description": "В Windows по умолчанию включены компоненты, которыми дома почти никто не пользуется: протокол SMB1 (старые сетевые папки, через него распространялся WannaCry), PowerShell 2.0 (используется вредоносными скриптами для обхода защиты), рабочие папки для корпоративных серверов, службы XPS и факса.\n\nКомпоненты выключаются тем же способом, что и в «Включение или отключение компонентов Windows». Отсутствующие в твоей сборке пропускаются. Каждый компонент обрабатывается 10–60 секунд — применение займёт пару минут. Откат включает их обратно.",
+    "Effect": "SMB1, PowerShell 2.0, рабочие папки, XPS и факс — выключены",
+    "ExpectedGain": "Меньше поверхности для атак и фоновых компонентов. На FPS не влияет",
+    "Apply": [
+      {
+        "type": "windows_feature",
+        "Name": "SMB1Protocol",
+        "Enabled": false
+      },
+      {
+        "type": "windows_feature",
+        "Name": "MicrosoftWindowsPowerShellV2Root",
+        "Enabled": false
+      },
+      {
+        "type": "windows_feature",
+        "Name": "MicrosoftWindowsPowerShellV2",
+        "Enabled": false
+      },
+      {
+        "type": "windows_feature",
+        "Name": "WorkFolders-Client",
+        "Enabled": false
+      },
+      {
+        "type": "windows_feature",
+        "Name": "Printing-XPSServices-Features",
+        "Enabled": false
+      },
+      {
+        "type": "windows_feature",
+        "Name": "FaxServicesClientPackage",
+        "Enabled": false
+      }
+    ]
+  },
+  {
+    "Id": "bg.unused_services_extra_off",
+    "Category": "Background",
+    "Risk": "Safe",
+    "Confidence": "Community",
+    "RequiresReboot": true,
+    "RequiresElevation": true,
+    "DetectAll": true,
+    "Presets": [
+      "Competitive",
+      "Maximum",
+      "Extreme"
+    ],
+    "Title": "Отключить редко нужные службы Windows",
+    "Description": "Второй набор служб, которые на домашнем игровом ПК простаивают или просыпаются впустую: связь с телефоном (PhoneSvc), родительский контроль (WpcMonSvc), платежи и NFC (SEMgrSvc, WalletService), сетевой доступ к библиотеке Windows Media (WMPNetworkSvc), факс, удалённый реестр, маршрутизатор AllJoyn для «умного дома» и панель отчётов о проблемах.\n\nНи одна из них не нужна играм, античитам, Xbox и Game Pass. Если пользуешься «Связью с телефоном» или родительским контролем — не применяй или откати после.",
+    "Effect": "PhoneSvc, WpcMonSvc, SEMgrSvc, WalletService, WMPNetworkSvc, Fax, RemoteRegistry, AJRouter, wercplsupport — отключены",
+    "ExpectedGain": "Меньше служб при загрузке и в фоне. На FPS не влияет",
+    "Apply": [
+      {
+        "type": "service",
+        "Name": "PhoneSvc",
+        "StartMode": "disabled"
+      },
+      {
+        "type": "service",
+        "Name": "WpcMonSvc",
+        "StartMode": "disabled"
+      },
+      {
+        "type": "service",
+        "Name": "SEMgrSvc",
+        "StartMode": "disabled"
+      },
+      {
+        "type": "service",
+        "Name": "WalletService",
+        "StartMode": "disabled"
+      },
+      {
+        "type": "service",
+        "Name": "WMPNetworkSvc",
+        "StartMode": "disabled"
+      },
+      {
+        "type": "service",
+        "Name": "Fax",
+        "StartMode": "disabled"
+      },
+      {
+        "type": "service",
+        "Name": "RemoteRegistry",
+        "StartMode": "disabled"
+      },
+      {
+        "type": "service",
+        "Name": "AJRouter",
+        "StartMode": "disabled"
+      },
+      {
+        "type": "service",
+        "Name": "wercplsupport",
+        "StartMode": "disabled"
+      }
+    ]
+  },
+  {
+    "Id": "bg.print_spooler_off",
+    "Category": "Background",
+    "Risk": "Moderate",
+    "Confidence": "Documented",
+    "RequiresReboot": true,
+    "RequiresElevation": true,
+    "DetectAll": true,
+    "Requires": [
+      "print.physical_printers=0"
+    ],
+    "Presets": [
+      "Maximum",
+      "Extreme"
+    ],
+    "Title": "Отключить диспетчер печати (принтеров нет)",
+    "Description": "Служба печати запускается всегда, даже если принтера нет, и исторически была одной из самых атакуемых служб Windows (PrintNightmare). Программа предлагает этот пункт, только если не нашла ни одного настоящего принтера.\n\nПосле отключения перестанет работать и «Печать в PDF». Понадобится печать — откати точку в «Точках отката».",
+    "Effect": "Службы Spooler и PrintNotify → отключены",
+    "ExpectedGain": "Минус фоновая служба и известная уязвимость. На FPS не влияет",
+    "Apply": [
+      {
+        "type": "service",
+        "Name": "Spooler",
+        "StartMode": "disabled"
+      },
+      {
+        "type": "service",
+        "Name": "PrintNotify",
+        "StartMode": "disabled"
+      }
+    ]
+  },
+  {
+    "Id": "bg.search_indexing_off",
+    "Category": "Background",
+    "Risk": "Moderate",
+    "Confidence": "Community",
+    "RequiresReboot": true,
+    "RequiresElevation": true,
+    "Requires": [
+      "storage.system_ssd=true"
+    ],
+    "Presets": [
+      "Maximum",
+      "Extreme"
+    ],
+    "Title": "Отключить индексирование поиска",
+    "Description": "Служба Windows Search постоянно обходит диск и обновляет индекс файлов. После установки или обновления игры она может часами читать десятки тысяч файлов — это нагрузка на диск и процессор в фоне.\n\nЦена: поиск файлов в «Пуске» и Проводнике станет медленнее, поиск писем в Outlook перестанет работать. Поиск приложений и настроек в «Пуске» продолжит работать. Пункт предлагается только при системе на SSD.",
+    "Effect": "Служба WSearch → отключена",
+    "ExpectedGain": "Нет фонового индексирования после установки игр",
+    "Apply": [
+      {
+        "type": "service",
+        "Name": "WSearch",
+        "StartMode": "disabled"
+      }
+    ]
+  },
+  {
+    "Id": "privacy.tasks_extra_off",
+    "Category": "Privacy",
+    "Risk": "Safe",
+    "Confidence": "Community",
+    "RequiresElevation": true,
+    "DetectAll": true,
+    "Presets": [
+      "Gaming",
+      "Competitive",
+      "Maximum",
+      "Extreme"
+    ],
+    "Title": "Отключить фоновые задачи сбора данных и обслуживания",
+    "Description": "Ещё один набор задач планировщика, которые запускаются сами: обновление офлайн-карт, сбор сведений о сети, оценка производительности WinSAT, анализ энергопотребления, загрузка настроек экспериментов Microsoft, проверка совместимости при запуске программ.\n\nЗадачи выключаются, а не удаляются: откат вернёт их. Задач, которых нет в твоей сборке, программа не касается.",
+    "Effect": "Задачи карт, NetTrace, WinSAT, Power Efficiency Diagnostics, Flighting и PCA — выключены",
+    "ExpectedGain": "Меньше внезапной фоновой нагрузки. Средний FPS не меняется",
+    "Apply": [
+      {
+        "type": "scheduled_task",
+        "Task": "\\Microsoft\\Windows\\Maps\\MapsUpdateTask",
+        "Enabled": false
+      },
+      {
+        "type": "scheduled_task",
+        "Task": "\\Microsoft\\Windows\\Maps\\MapsToastTask",
+        "Enabled": false
+      },
+      {
+        "type": "scheduled_task",
+        "Task": "\\Microsoft\\Windows\\NetTrace\\GatherNetworkInfo",
+        "Enabled": false
+      },
+      {
+        "type": "scheduled_task",
+        "Task": "\\Microsoft\\Windows\\Maintenance\\WinSAT",
+        "Enabled": false
+      },
+      {
+        "type": "scheduled_task",
+        "Task": "\\Microsoft\\Windows\\Power Efficiency Diagnostics\\AnalyzeSystem",
+        "Enabled": false
+      },
+      {
+        "type": "scheduled_task",
+        "Task": "\\Microsoft\\Windows\\Flighting\\OneSettings\\RefreshCache",
+        "Enabled": false
+      },
+      {
+        "type": "scheduled_task",
+        "Task": "\\Microsoft\\Windows\\Flighting\\FeatureConfig\\UsageDataReporting",
+        "Enabled": false
+      },
+      {
+        "type": "scheduled_task",
+        "Task": "\\Microsoft\\Windows\\Application Experience\\PcaPatchDbTask",
+        "Enabled": false
+      },
+      {
+        "type": "scheduled_task",
+        "Task": "\\Microsoft\\Windows\\Application Experience\\StartupAppTask",
+        "Enabled": false
+      },
+      {
+        "type": "scheduled_task",
+        "Task": "\\Microsoft\\Windows\\CloudExperienceHost\\CreateObjectTask",
+        "Enabled": false
+      }
+    ]
+  }
+]

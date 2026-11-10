@@ -26,7 +26,7 @@ public sealed record UpdateInfo(
 public static class Updater
 {
     private const string ReleasesApi =
-        "https://api.github.com/repos/HumsteRD/Game-Optimization/releases/latest";
+        "https://api.github.com/repos/HumsteRD/Velocity/releases/latest";
 
     private static string CacheFolder => Path.Combine(AppSettings.Folder, "updates");
 
@@ -163,7 +163,7 @@ public static class Updater
         var actual = new FileInfo(partial).Length;
         if (actual != update.SizeBytes)
             throw new InvalidOperationException(
-                $"Файл скачан не полностью: {actual} из {update.SizeBytes} байт");
+                Loc.F("Файл скачан не полностью: {0} из {1} байт", actual, update.SizeBytes));
 
         if (File.Exists(target)) File.Delete(target);
         File.Move(partial, target);

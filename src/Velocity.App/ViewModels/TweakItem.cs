@@ -77,10 +77,10 @@ public sealed class TweakItem : INotifyPropertyChanged
 
     public string StateText => State switch
     {
-        TweakState.Applied => "применено",
-        TweakState.NotApplied => "не применено",
-        TweakState.NotApplicable => "не подходит",
-        _ => "состояние неизвестно"
+        TweakState.Applied => Loc.T("применено"),
+        TweakState.NotApplied => Loc.T("не применено"),
+        TweakState.NotApplicable => Loc.T("не подходит"),
+        _ => Loc.T("состояние неизвестно")
     };
 
     /// <summary>
@@ -89,46 +89,58 @@ public sealed class TweakItem : INotifyPropertyChanged
     /// </summary>
     public string? DisabledReason => Badge switch
     {
-        TweakBadge.Done => "Уже применено. Вернуть прежнее значение можно в разделе «Точки отката».",
-        TweakBadge.Manual => "Эту настройку программа изменить не может — она задаётся вне Windows. Ниже пошаговая инструкция.",
+        TweakBadge.Done => Loc.T("Уже применено. Вернуть прежнее значение можно в разделе «Точки отката»."),
+        TweakBadge.Manual => Loc.T("Эту настройку программа изменить не может — она задаётся вне Windows. Ниже пошаговая инструкция."),
         _ => null
     };
 
     public bool CanApply => Badge == TweakBadge.Actionable;
 
+    /// <summary>Как применяется: сразу или после перезагрузки, с правами администратора или без.</summary>
+    public string ApplyText => string.Join(" · ", new[]
+    {
+        RequiresReboot ? Loc.T("Вступит в силу после перезагрузки") : Loc.T("Сразу, без перезагрузки"),
+        RequiresElevation ? Loc.T("Нужны права администратора") : null,
+        Tweak.IsManual ? Loc.T("Делается вручную по шагам ниже") : null
+    }.Where(x => x is not null));
+
+    public System.Windows.Media.Brush ApplyBrush => (System.Windows.Media.Brush)System.Windows.Application.Current
+        .FindResource(RequiresReboot ? "Warning" : "TextSecondary");
+
     public string RiskText => Risk switch
     {
-        TweakRisk.Safe => "Безопасно — обратимо, поведение системы не меняется",
-        TweakRisk.Moderate => "Умеренно — обратимо, но меняет поведение системы",
-        TweakRisk.Advanced => "Продвинуто — требует перезагрузки, затрагивает системные подсистемы",
-        TweakRisk.Expert => "С риском — размен защиты системы на производительность",
+        TweakRisk.Safe => Loc.T("Безопасно — обратимо, поведение системы не меняется"),
+        TweakRisk.Moderate => Loc.T("Умеренно — обратимо, но меняет поведение системы"),
+        TweakRisk.Advanced => Loc.T("Продвинуто — требует перезагрузки, затрагивает системные подсистемы"),
+        TweakRisk.Expert => Loc.T("С риском — размен защиты системы на производительность"),
         _ => ""
     };
 
     public string ConfidenceText => Tweak.Confidence switch
     {
-        TweakConfidence.Measured => "Замерено на нескольких конфигурациях",
-        TweakConfidence.Documented => "Задокументировано производителем",
-        TweakConfidence.Community => "Воспроизводится по отзывам, строгих замеров нет",
-        TweakConfidence.Experimental => "Гипотеза, эффект не подтверждён",
+        TweakConfidence.Measured => Loc.T("Замерено на нескольких конфигурациях"),
+        TweakConfidence.Documented => Loc.T("Задокументировано производителем"),
+        TweakConfidence.Community => Loc.T("Воспроизводится по отзывам, строгих замеров нет"),
+        TweakConfidence.Experimental => Loc.T("Гипотеза, эффект не подтверждён"),
         _ => ""
     };
 
     public string CategoryName => Tweak.Category switch
     {
-        TweakCategory.Display => "Монитор",
-        TweakCategory.Power => "Питание",
-        TweakCategory.Cpu => "Процессор",
-        TweakCategory.Gpu => "Видеокарта",
+        TweakCategory.Display => Loc.T("Монитор"),
+        TweakCategory.Power => Loc.T("Питание"),
+        TweakCategory.Cpu => Loc.T("Процессор"),
+        TweakCategory.Gpu => Loc.T("Видеокарта"),
         TweakCategory.Windows => "Windows",
-        TweakCategory.Security => "Безопасность и производительность",
-        TweakCategory.Input => "Мышь и клавиатура",
-        TweakCategory.Memory => "Память",
-        TweakCategory.Storage => "Накопители",
-        TweakCategory.Network => "Сеть",
-        TweakCategory.Background => "Фоновые программы",
-        TweakCategory.Game => "Игры",
-        _ => "Прочее"
+        TweakCategory.Privacy => Loc.T("Приватность и фон"),
+        TweakCategory.Security => Loc.T("Безопасность и производительность"),
+        TweakCategory.Input => Loc.T("Мышь и клавиатура"),
+        TweakCategory.Memory => Loc.T("Память"),
+        TweakCategory.Storage => Loc.T("Накопители"),
+        TweakCategory.Network => Loc.T("Сеть"),
+        TweakCategory.Background => Loc.T("Фоновые программы"),
+        TweakCategory.Game => Loc.T("Игры"),
+        _ => Loc.T("Прочее")
     };
 
     public event PropertyChangedEventHandler? PropertyChanged;

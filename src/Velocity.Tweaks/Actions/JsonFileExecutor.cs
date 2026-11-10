@@ -1,3 +1,4 @@
+using Velocity.Core;
 using System.Globalization;
 using System.Runtime.Versioning;
 using System.Text;
@@ -59,10 +60,10 @@ public static class JsonFileExecutor
         var path = ResolvePath(action.File);
 
         if (!File.Exists(path))
-            throw new FileNotFoundException($"Файл настроек не найден: {path}");
+            throw new FileNotFoundException(L10n.F("Файл настроек не найден: {0}", path));
 
         var root = JsonNode.Parse(File.ReadAllText(path)) as JsonObject
-            ?? throw new InvalidOperationException($"Файл {path} не является объектом JSON");
+            ?? throw new InvalidOperationException(L10n.F("Файл {0} не является объектом JSON", path));
 
         root[action.Property] = Parse(action.Value, action.Kind);
         Save(path, root);

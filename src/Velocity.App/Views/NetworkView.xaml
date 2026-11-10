@@ -1,0 +1,216 @@
+<UserControl x:Class="Velocity.App.Views.NetworkView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:app="clr-namespace:Velocity.App"
+             Background="Transparent">
+
+    <UserControl.Resources>
+        <app:NullToVisibilityConverter x:Key="NullToVis"/>
+        <app:BoolToVisibilityConverter x:Key="BoolToVis"/>
+
+        <DataTemplate x:Key="InfoRow">
+            <Grid Margin="0,0,0,9">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="150"/>
+                    <ColumnDefinition Width="*"/>
+                </Grid.ColumnDefinitions>
+                <TextBlock Text="{Binding Label}" Style="{StaticResource TextMuted}"/>
+                <TextBlock Grid.Column="1" Text="{Binding Value}" Style="{StaticResource TextBase}"
+                           FontSize="{StaticResource FontSm}" FontWeight="SemiBold" TextWrapping="Wrap"/>
+            </Grid>
+        </DataTemplate>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="28,24,28,16">
+            <StackPanel Margin="0,0,180,0">
+                <TextBlock Text="{app:T 'Сеть'}" Style="{StaticResource TextTitle}"/>
+                <TextBlock Style="{StaticResource TextMuted}" Margin="0,4,0,0" TextWrapping="Wrap"
+                           Text="{app:T 'Пинг, разброс и потери до роутера и интернета, сравнение DNS.'}"/>
+            </StackPanel>
+            <Button Content="{app:T 'Обновить'}" Style="{StaticResource ButtonCompact}" HorizontalAlignment="Right"
+                    VerticalAlignment="Center" Click="Refresh_Click"/>
+        </Grid>
+
+        <ScrollViewer Grid.Row="1" Style="{StaticResource CleanScrollViewer}" Padding="28,0,20,20">
+            <StackPanel MaxWidth="1000" HorizontalAlignment="Left">
+
+                <!-- ─────────── Подключение ─────────── -->
+                <Border Style="{StaticResource GroupPanel}" Padding="22,18">
+                    <StackPanel>
+                        <TextBlock Text="{app:T 'Подключение'}" Style="{StaticResource TextLabel}" Margin="0,0,0,12"/>
+                        <ItemsControl x:Name="ConnectionRows" ItemTemplate="{StaticResource InfoRow}"/>
+                        <TextBlock x:Name="NoConnection" Style="{StaticResource TextBody}" Visibility="Collapsed"
+                                   Text="{app:T 'Активное подключение с выходом в интернет не найдено.'}"/>
+                        <Border x:Name="WifiHint" Background="{StaticResource WarningDim}" CornerRadius="{StaticResource RadiusSm}"
+                                Padding="12,10" Margin="0,8,0,0" Visibility="Collapsed">
+                            <StackPanel>
+                                <TextBlock Style="{StaticResource TextBody}" FontSize="{StaticResource FontSm}"
+                                           Foreground="{StaticResource Warning}" TextWrapping="Wrap"
+                                           Text="{app:T 'Подключение по Wi-Fi — частая причина скачков пинга. Если разброс до роутера больше 2–3 мс, поможет кабель.'}"/>
+                                <Button Content="{app:T 'Руководство «Кабель вместо Wi-Fi»'}" Style="{StaticResource ButtonLink}"
+                                        Margin="0,6,0,0" Tag="net.ethernet" Click="Guide_Click"/>
+                            </StackPanel>
+                        </Border>
+                        <TextBlock x:Name="VpnHint" Style="{StaticResource TextMuted}" Margin="0,8,0,0" TextWrapping="Wrap"
+                                   Visibility="Collapsed"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- ─────────── Пинг ─────────── -->
+                <Border Style="{StaticResource GroupPanel}" Padding="22,18" Margin="0,12,0,0">
+                    <StackPanel>
+                        <Grid>
+                            <StackPanel Margin="0,0,220,0">
+                                <TextBlock Text="{app:T 'Проверка соединения'}" Style="{StaticResource TextLabel}"/>
+                                <TextBlock Style="{StaticResource TextBody}" FontSize="{StaticResource FontSm}" Margin="0,6,0,0"
+                                           TextWrapping="Wrap"
+                                           Text="{app:T '60 пакетов до роутера и публичных серверов.'}"/>
+                            </StackPanel>
+                            <Button x:Name="PingButton" Content="{app:T 'Проверить соединение'}" Style="{StaticResource ButtonPrimary}"
+                                    HorizontalAlignment="Right" VerticalAlignment="Center" Click="Ping_Click"/>
+                        </Grid>
+
+                        <StackPanel x:Name="PingResults" Visibility="Collapsed" Margin="0,14,0,0">
+                            <Grid Margin="0,0,0,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="90"/>
+                                    <ColumnDefinition Width="90"/>
+                                    <ColumnDefinition Width="90"/>
+                                    <ColumnDefinition Width="90"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{app:T 'Цель'}" Style="{StaticResource TextLabel}"/>
+                                <TextBlock Grid.Column="1" Text="{app:T 'Средний'}" Style="{StaticResource TextLabel}" HorizontalAlignment="Right"/>
+                                <TextBlock Grid.Column="2" Text="{app:T 'Макс'}" Style="{StaticResource TextLabel}" HorizontalAlignment="Right"/>
+                                <TextBlock Grid.Column="3" Text="{app:T 'Разброс'}" Style="{StaticResource TextLabel}" HorizontalAlignment="Right"/>
+                                <TextBlock Grid.Column="4" Text="{app:T 'Потери'}" Style="{StaticResource TextLabel}" HorizontalAlignment="Right"/>
+                            </Grid>
+                            <ItemsControl x:Name="PingRows">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="{StaticResource BorderSubtle}" BorderThickness="0,1,0,0" Padding="0,8">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="90"/>
+                                                    <ColumnDefinition Width="90"/>
+                                                    <ColumnDefinition Width="90"/>
+                                                    <ColumnDefinition Width="90"/>
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel>
+                                                    <TextBlock Text="{Binding Label}" Style="{StaticResource TextBase}" FontSize="{StaticResource FontSm}"/>
+                                                    <TextBlock Text="{Binding Address}" Style="{StaticResource TextMuted}" FontSize="{StaticResource FontXs}"/>
+                                                </StackPanel>
+                                                <TextBlock Grid.Column="1" Text="{Binding Avg}" Style="{StaticResource TextValue}" HorizontalAlignment="Right"/>
+                                                <TextBlock Grid.Column="2" Text="{Binding Max}" Style="{StaticResource TextValue}" HorizontalAlignment="Right"/>
+                                                <TextBlock Grid.Column="3" Text="{Binding Jitter}" Style="{StaticResource TextValue}" HorizontalAlignment="Right"
+                                                           Foreground="{Binding JitterBrush}"/>
+                                                <TextBlock Grid.Column="4" Text="{Binding Loss}" Style="{StaticResource TextValue}" HorizontalAlignment="Right"
+                                                           Foreground="{Binding LossBrush}"/>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <Border x:Name="VerdictPanel" CornerRadius="{StaticResource RadiusSm}" Padding="12,10" Margin="0,10,0,0">
+                                <StackPanel>
+                                    <TextBlock x:Name="VerdictTitle" Style="{StaticResource TextBase}" FontSize="{StaticResource FontSm}"
+                                               FontWeight="SemiBold" TextWrapping="Wrap"/>
+                                    <TextBlock x:Name="VerdictText" Style="{StaticResource TextBody}" FontSize="{StaticResource FontSm}"
+                                               Margin="0,4,0,0" TextWrapping="Wrap"/>
+                                    <WrapPanel x:Name="VerdictLinks" Margin="0,6,0,0"/>
+                                </StackPanel>
+                            </Border>
+                        </StackPanel>
+                    </StackPanel>
+                </Border>
+
+                <!-- ─────────── DNS ─────────── -->
+                <Border Style="{StaticResource GroupPanel}" Padding="22,18" Margin="0,12,0,0">
+                    <StackPanel>
+                        <Grid>
+                            <StackPanel Margin="0,0,220,0">
+                                <TextBlock Text="DNS" Style="{StaticResource TextLabel}"/>
+                                <TextBlock Style="{StaticResource TextBody}" FontSize="{StaticResource FontSm}" Margin="0,6,0,0"
+                                           TextWrapping="Wrap"
+                                           Text="{app:T 'Ускоряет сайты и вход в лаунчеры. На пинг в матче не влияет.'}"/>
+                            </StackPanel>
+                            <Button x:Name="DnsButton" Content="{app:T 'Проверить DNS'}" Style="{StaticResource ButtonSecondary}"
+                                    HorizontalAlignment="Right" VerticalAlignment="Center" Click="Dns_Click"/>
+                        </Grid>
+
+                        <StackPanel x:Name="DnsResults" Visibility="Collapsed" Margin="0,14,0,0">
+                            <ItemsControl x:Name="DnsRows">
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="{StaticResource BorderSubtle}" BorderThickness="0,1,0,0" Padding="0,8">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="120"/>
+                                                    <ColumnDefinition Width="130"/>
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel>
+                                                    <StackPanel Orientation="Horizontal">
+                                                        <TextBlock Text="{Binding Name}" Style="{StaticResource TextBase}"
+                                                                   FontSize="{StaticResource FontSm}" FontWeight="SemiBold"/>
+                                                        <Border Background="{StaticResource AccentDim}" CornerRadius="3" Padding="6,1" Margin="8,0,0,0"
+                                                                Visibility="{Binding IsBest, Converter={StaticResource BoolToVis}}">
+                                                            <TextBlock Text="{app:T 'Быстрее всех'}" Style="{StaticResource TextLabel}" Foreground="{StaticResource AccentInk}"/>
+                                                        </Border>
+                                                        <Border Background="{StaticResource BgInset}" CornerRadius="3" Padding="6,1" Margin="8,0,0,0"
+                                                                Visibility="{Binding IsCurrent, Converter={StaticResource BoolToVis}}">
+                                                            <TextBlock Text="{app:T 'Сейчас'}" Style="{StaticResource TextLabel}"/>
+                                                        </Border>
+                                                    </StackPanel>
+                                                    <TextBlock Text="{Binding Details}" Style="{StaticResource TextMuted}" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                                                </StackPanel>
+                                                <TextBlock Grid.Column="1" Text="{Binding Time}" Style="{StaticResource TextValue}"
+                                                           HorizontalAlignment="Right" VerticalAlignment="Center"
+                                                           Foreground="{Binding TimeBrush}"/>
+                                                <Button Grid.Column="2" Content="{app:T 'Применить'}" Style="{StaticResource ButtonCompact}"
+                                                        HorizontalAlignment="Right" VerticalAlignment="Center" Tag="{Binding}"
+                                                        Click="ApplyDns_Click"
+                                                        Visibility="{Binding CanApply, Converter={StaticResource BoolToVis}}"/>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+                            <TextBlock x:Name="DnsVerdict" Style="{StaticResource TextBody}" FontSize="{StaticResource FontSm}"
+                                       Margin="0,10,0,0" TextWrapping="Wrap"/>
+                        </StackPanel>
+
+                        <Button x:Name="ResetDnsButton" Content="{app:T 'Вернуть автоматический DNS (от роутера)'}"
+                                Style="{StaticResource ButtonGhost}" HorizontalAlignment="Left" Margin="-10,10,0,0"
+                                Click="ResetDns_Click" Visibility="Collapsed"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- ─────────── Что ещё ─────────── -->
+                <Border Style="{StaticResource GroupPanel}" Padding="22,16" Margin="0,12,0,0">
+                    <StackPanel>
+                        <TextBlock Text="{app:T 'Что ещё помогает'}" Style="{StaticResource TextLabel}"/>
+                        <TextBlock Style="{StaticResource TextBody}" FontSize="{StaticResource FontSm}" Margin="0,8,0,4" TextWrapping="Wrap"
+                                   Text="{app:T 'Сетевые настройки Windows — в «Оптимизации», категория «Сеть». Роутер настраивается вручную:'}"/>
+                        <WrapPanel>
+                            <Button Content="{app:T 'Bufferbloat и QoS на роутере'}" Style="{StaticResource ButtonLink}" Margin="0,4,18,0"
+                                    Tag="net.bufferbloat" Click="Guide_Click"/>
+                            <Button Content="{app:T 'NAT, UPnP и порты'}" Style="{StaticResource ButtonLink}" Margin="0,4,18,0"
+                                    Tag="net.router" Click="Guide_Click"/>
+                            <Button Content="{app:T 'Маршрут до сервера и «ускорители»'}" Style="{StaticResource ButtonLink}" Margin="0,4,18,0"
+                                    Tag="net.routing" Click="Guide_Click"/>
+                        </WrapPanel>
+                    </StackPanel>
+                </Border>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

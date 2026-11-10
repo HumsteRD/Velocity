@@ -25,9 +25,14 @@ public static class Plural
         };
     }
 
-    /// <summary>Число вместе с согласованным словом: «23 программы».</summary>
+    /// <summary>
+    /// Число вместе с согласованным словом: «23 программы». В переводе форм две
+    /// (1 game, 5 games), слова берутся из словаря по русским «одна» и «много».
+    /// </summary>
     public static string With(int count, string one, string few, string many)
-        => $"{count} {Of(count, one, few, many)}";
+        => L10n.IsRussian
+            ? $"{count} {Of(count, one, few, many)}"
+            : $"{count} {(Math.Abs(count) == 1 ? L10n.T(one) : L10n.T(many))}";
 
     public static string Games(int count) => With(count, "игра", "игры", "игр");
     public static string Programs(int count) => With(count, "программа", "программы", "программ");

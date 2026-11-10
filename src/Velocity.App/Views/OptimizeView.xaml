@@ -2,7 +2,7 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:app="clr-namespace:Velocity.App"
-             Background="{StaticResource BgBase}">
+             Background="Transparent">
 
     <UserControl.Resources>
         <app:RiskLabelConverter x:Key="RiskLabel"/>
@@ -17,39 +17,15 @@
             </CollectionViewSource.GroupDescriptions>
         </CollectionViewSource>
 
-        <Style x:Key="PresetChip" TargetType="RadioButton">
-            <Setter Property="FontFamily" Value="{StaticResource FontUi}"/>
-            <Setter Property="FontSize" Value="{StaticResource FontSm}"/>
-            <Setter Property="Foreground" Value="{StaticResource TextSecondary}"/>
-            <Setter Property="Cursor" Value="Hand"/>
-            <Setter Property="Margin" Value="0,0,6,0"/>
-            <Setter Property="Template">
-                <Setter.Value>
-                    <ControlTemplate TargetType="RadioButton">
-                        <Border x:Name="Bd" Background="{StaticResource BgSurface}"
-                                BorderBrush="{StaticResource BorderSubtle}" BorderThickness="1"
-                                CornerRadius="{StaticResource RadiusMd}" Padding="13,7">
-                            <ContentPresenter/>
-                        </Border>
-                        <ControlTemplate.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource BorderStrong}"/>
-                            </Trigger>
-                            <Trigger Property="IsChecked" Value="True">
-                                <Setter TargetName="Bd" Property="BorderBrush" Value="{StaticResource Accent}"/>
-                                <Setter TargetName="Bd" Property="Background" Value="{StaticResource AccentDim}"/>
-                                <Setter Property="Foreground" Value="{StaticResource Accent}"/>
-                                <Setter Property="FontWeight" Value="SemiBold"/>
-                            </Trigger>
-                        </ControlTemplate.Triggers>
-                    </ControlTemplate>
-                </Setter.Value>
-            </Setter>
-        </Style>
-
         <!-- Метка раздела внутри раскрытой справки -->
         <Style x:Key="GuideLabel" TargetType="TextBlock" BasedOn="{StaticResource TextLabel}">
             <Setter Property="Margin" Value="0,0,0,5"/>
+        </Style>
+
+        <!-- Подпись строки в карточке фактов: «Риск», «Применение» -->
+        <Style x:Key="FactLabel" TargetType="TextBlock" BasedOn="{StaticResource TextMuted}">
+            <Setter Property="Margin" Value="0,1,12,10"/>
+            <Setter Property="TextWrapping" Value="Wrap"/>
         </Style>
     </UserControl.Resources>
 
@@ -61,24 +37,41 @@
         </Grid.RowDefinitions>
 
         <StackPanel Grid.Row="0" Margin="28,24,28,16">
-            <TextBlock Text="Оптимизация" Style="{StaticResource TextTitle}"/>
-            <TextBlock x:Name="SubtitleText" Style="{StaticResource TextMuted}" Margin="0,4,0,0"/>
+            <Grid>
+                <StackPanel Margin="0,0,280,0">
+                    <TextBlock x:Name="TitleText" Text="{app:T 'Оптимизация'}" Style="{StaticResource TextTitle}"/>
+                    <TextBlock x:Name="SubtitleText" Style="{StaticResource TextMuted}" Margin="0,4,0,0" TextWrapping="Wrap"/>
+                </StackPanel>
+            <!-- Поиск по всему каталогу: название, описание, эффект -->
+            <Grid Width="260" HorizontalAlignment="Right" VerticalAlignment="Top">
+                <TextBox x:Name="SearchBox" Style="{StaticResource Input}" Padding="32,0,10,0"
+                         FontFamily="{StaticResource FontUi}" TextChanged="Search_TextChanged" KeyDown="Search_KeyDown"
+                         AutomationProperties.Name="{app:T 'Поиск по настройкам'}"/>
+                <TextBlock Text="&#xE721;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="12"
+                           Foreground="{StaticResource TextTertiary}" Margin="12,0,0,0" VerticalAlignment="Center"
+                           IsHitTestVisible="False"/>
+                <TextBlock x:Name="SearchPlaceholder" Text="{app:T 'Поиск — Ctrl+F'}" Style="{StaticResource TextMuted}"
+                           Margin="33,0,0,0" VerticalAlignment="Center" IsHitTestVisible="False"/>
+            </Grid>
+            </Grid>
 
-            <TextBlock Text="НАБОР НАСТРОЕК" Style="{StaticResource TextLabel}" Margin="0,20,0,8"/>
-            <WrapPanel x:Name="PresetPanel">
-                <RadioButton Style="{StaticResource PresetChip}" GroupName="Preset" Tag="Safe"
-                             Content="Безопасный" IsChecked="True" Checked="Preset_Checked"/>
-                <RadioButton Style="{StaticResource PresetChip}" GroupName="Preset" Tag="Gaming"
-                             Content="Игровой" Checked="Preset_Checked"/>
-                <RadioButton Style="{StaticResource PresetChip}" GroupName="Preset" Tag="Competitive"
-                             Content="Соревновательный" Checked="Preset_Checked"/>
-                <RadioButton Style="{StaticResource PresetChip}" GroupName="Preset" Tag="Maximum"
-                             Content="Максимум" Checked="Preset_Checked"/>
-                <RadioButton Style="{StaticResource PresetChip}" GroupName="Preset" Tag="Extreme"
-                             Content="Экстремальный" Checked="Preset_Checked"/>
-                <RadioButton Style="{StaticResource PresetChip}" GroupName="Preset" Tag="All"
-                             Content="Все настройки" Checked="Preset_Checked"/>
-            </WrapPanel>
+            <TextBlock Text="{app:T 'Набор настроек'}" Style="{StaticResource TextLabel}" Margin="0,20,0,8"/>
+            <Border Style="{StaticResource SegmentBar}" HorizontalAlignment="Left">
+                <StackPanel x:Name="PresetPanel" Orientation="Horizontal">
+                <RadioButton Style="{StaticResource Segment}" GroupName="Preset" Tag="Safe"
+                             Content="{app:T 'Безопасный'}" IsChecked="True" Checked="Preset_Checked"/>
+                <RadioButton Style="{StaticResource Segment}" GroupName="Preset" Tag="Gaming"
+                             Content="{app:T 'Игровой'}" Checked="Preset_Checked"/>
+                <RadioButton Style="{StaticResource Segment}" GroupName="Preset" Tag="Competitive"
+                             Content="{app:T 'Соревновательный'}" Checked="Preset_Checked"/>
+                <RadioButton Style="{StaticResource Segment}" GroupName="Preset" Tag="Maximum"
+                             Content="{app:T 'Максимум'}" Checked="Preset_Checked"/>
+                <RadioButton Style="{StaticResource Segment}" GroupName="Preset" Tag="Extreme"
+                             Content="{app:T 'Экстремальный'}" Checked="Preset_Checked"/>
+                <RadioButton Style="{StaticResource Segment}" GroupName="Preset" Tag="All"
+                             Content="{app:T 'Все настройки'}" Checked="Preset_Checked"/>
+            </StackPanel>
+            </Border>
 
             <TextBlock x:Name="PresetHint" Style="{StaticResource TextBody}" Margin="0,10,0,0"
                        FontSize="{StaticResource FontSm}"/>
@@ -126,17 +119,19 @@
                                         <TextBlock Text="&#xE73E;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets"
                                                    FontSize="11" Foreground="{StaticResource Success}"
                                                    VerticalAlignment="Center"/>
-                                        <TextBlock Text="применено" Style="{StaticResource TextMuted}"
+                                        <TextBlock Text="{app:T 'применено'}" Style="{StaticResource TextMuted}"
                                                    Foreground="{StaticResource Success}" Margin="6,0,0,0"
                                                    VerticalAlignment="Center"/>
                                     </StackPanel>
 
-                                    <Border Grid.Column="1" Background="{StaticResource WarningDim}"
-                                            CornerRadius="3" Padding="7,3" Margin="0,0,12,0"
-                                            VerticalAlignment="Center"
+                                    <Border Grid.Column="1" Style="{StaticResource Badge}" Background="{StaticResource WarningDim}"
+                                            Margin="0,0,12,0"
                                             Visibility="{Binding ShowManualMark, Converter={StaticResource BoolToVis}}">
-                                        <TextBlock Text="ВРУЧНУЮ" Style="{StaticResource TextLabel}"
-                                                   Foreground="{StaticResource Warning}"/>
+                                        <StackPanel Orientation="Horizontal">
+                                            <Ellipse Style="{StaticResource BadgeDot}" Fill="{StaticResource Warning}"/>
+                                            <TextBlock Text="{app:T 'Вручную'}" Style="{StaticResource BadgeText}"
+                                                       Foreground="{StaticResource Warning}"/>
+                                        </StackPanel>
                                     </Border>
 
                                     <CheckBox Grid.Column="1" Style="{StaticResource Switch}"
@@ -153,7 +148,7 @@
                                                 <Style.Triggers>
                                                     <DataTrigger Binding="{Binding IsExpanded}" Value="True">
                                                         <Setter Property="Text" Value="&#xE70E;"/>
-                                                        <Setter Property="Foreground" Value="{StaticResource Accent}"/>
+                                                        <Setter Property="Foreground" Value="{StaticResource AccentInk}"/>
                                                     </DataTrigger>
                                                 </Style.Triggers>
                                             </Style>
@@ -161,76 +156,94 @@
                                     </TextBlock>
                                 </Grid>
 
-                                <!-- ─── Раскрытая справка ─── -->
-                                <StackPanel Margin="18,0,18,16"
-                                            Visibility="{Binding IsExpanded, Converter={StaticResource BoolToVis}}">
-                                    <Border Height="1" Background="{StaticResource BorderSubtle}" Margin="0,0,0,14"/>
+                                <!-- ─── Раскрытая справка: текст и карточка фактов ─── -->
+                                <Border Margin="12,0,12,12" Padding="18,16" Background="{StaticResource BgInset}"
+                                        BorderBrush="{StaticResource BorderSubtle}" BorderThickness="1"
+                                        CornerRadius="{StaticResource RadiusMd}"
+                                        Visibility="{Binding IsExpanded, Converter={StaticResource BoolToVis}}">
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Description}" Style="{StaticResource TextBase}"
+                                                   FontSize="13.5" LineHeight="22" TextWrapping="Wrap" MaxWidth="820"
+                                                   HorizontalAlignment="Left"/>
 
-                                    <TextBlock Text="ЧТО ЭТО" Style="{StaticResource GuideLabel}"/>
-                                    <TextBlock Text="{Binding Description}" Style="{StaticResource TextBody}"
-                                               FontSize="{StaticResource FontSm}"/>
+                                        <Border Height="1" Background="{StaticResource BorderSubtle}" Margin="0,14,0,12"/>
 
-                                    <TextBlock Text="ЧТО ИЗМЕНИТСЯ" Style="{StaticResource GuideLabel}"
-                                               Margin="0,14,0,5"
-                                               Visibility="{Binding Effect, Converter={StaticResource NullToVis}}"/>
-                                    <TextBlock Text="{Binding Effect}" Style="{StaticResource TextValue}"
-                                               TextWrapping="Wrap"
-                                               Visibility="{Binding Effect, Converter={StaticResource NullToVis}}"/>
+                                        <Grid>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="150"/>
+                                                <ColumnDefinition Width="*"/>
+                                            </Grid.ColumnDefinitions>
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
 
-                                    <!-- Пошаговая инструкция для того, что программа сделать не может -->
-                                    <StackPanel Margin="0,14,0,0"
-                                                Visibility="{Binding ManualSteps.Count, Converter={StaticResource CountToVis}}">
-                                        <TextBlock Text="КАК ЭТО СДЕЛАТЬ" Style="{StaticResource GuideLabel}"/>
-                                        <ItemsControl ItemsSource="{Binding ManualSteps}">
-                                            <ItemsControl.ItemTemplate>
-                                                <DataTemplate>
-                                                    <Grid Margin="0,0,0,6">
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="Auto"/>
-                                                            <ColumnDefinition Width="*"/>
-                                                        </Grid.ColumnDefinitions>
-                                                        <Border Grid.Column="0" Width="5" Height="5" CornerRadius="3"
-                                                                Background="{StaticResource Accent}"
-                                                                VerticalAlignment="Top" Margin="2,7,10,0"/>
-                                                        <TextBlock Grid.Column="1" Text="{Binding}"
-                                                                   Style="{StaticResource TextBody}"
-                                                                   FontSize="{StaticResource FontSm}"/>
-                                                    </Grid>
-                                                </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
+                                            <TextBlock Grid.Row="0" Text="{app:T 'Что даст'}" Style="{StaticResource FactLabel}"
+                                                       Visibility="{Binding ExpectedGain, Converter={StaticResource NullToVis}}"/>
+                                            <TextBlock Grid.Row="0" Grid.Column="1" Text="{Binding ExpectedGain}" Style="{StaticResource TextBase}"
+                                                       FontWeight="SemiBold" TextWrapping="Wrap" Margin="0,0,0,10"
+                                                       Visibility="{Binding ExpectedGain, Converter={StaticResource NullToVis}}"/>
+
+                                            <TextBlock Grid.Row="1" Text="{app:T 'Что изменится'}" Style="{StaticResource FactLabel}"
+                                                       Visibility="{Binding Effect, Converter={StaticResource NullToVis}}"/>
+                                            <Border Grid.Row="1" Grid.Column="1" HorizontalAlignment="Left" Margin="0,-2,0,10"
+                                                    Background="{StaticResource BgSurface}" BorderBrush="{StaticResource BorderSubtle}"
+                                                    BorderThickness="1" CornerRadius="{StaticResource RadiusSm}" Padding="9,5"
+                                                    Visibility="{Binding Effect, Converter={StaticResource NullToVis}}">
+                                                <TextBlock Text="{Binding Effect}" Style="{StaticResource TextBase}"
+                                                           FontSize="12.5" TextWrapping="Wrap"/>
+                                            </Border>
+
+                                            <TextBlock Grid.Row="2" Text="{app:T 'Риск'}" Style="{StaticResource FactLabel}"/>
+                                            <StackPanel Grid.Row="2" Grid.Column="1" Orientation="Horizontal" Margin="0,0,0,10">
+                                                <Ellipse Width="7" Height="7" VerticalAlignment="Center" Margin="0,0,8,0"
+                                                         Fill="{Binding Risk, Converter={StaticResource RiskBrush}}"/>
+                                                <TextBlock Text="{Binding RiskText}" Style="{StaticResource TextBase}" TextWrapping="Wrap"/>
+                                            </StackPanel>
+
+                                            <TextBlock Grid.Row="3" Text="{app:T 'Достоверность'}" Style="{StaticResource FactLabel}"/>
+                                            <TextBlock Grid.Row="3" Grid.Column="1" Text="{Binding ConfidenceText}" Style="{StaticResource TextBase}"
+                                                       Foreground="{StaticResource TextSecondary}" TextWrapping="Wrap" Margin="0,0,0,10"/>
+
+                                            <TextBlock Grid.Row="4" Text="{app:T 'Применение'}" Style="{StaticResource FactLabel}"/>
+                                            <TextBlock Grid.Row="4" Grid.Column="1" Text="{Binding ApplyText}" Style="{StaticResource TextBase}"
+                                                       Foreground="{Binding ApplyBrush}" TextWrapping="Wrap"/>
+                                        </Grid>
+
+                                        <!-- Пошаговая инструкция для того, что программа сделать не может -->
+                                        <StackPanel Margin="0,16,0,0"
+                                                    Visibility="{Binding ManualSteps.Count, Converter={StaticResource CountToVis}}">
+                                            <TextBlock Text="{app:T 'Как это сделать'}" Style="{StaticResource FactLabel}" Margin="0,0,0,8"/>
+                                            <ItemsControl ItemsSource="{Binding ManualSteps}" AlternationCount="100">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Grid Margin="0,0,0,8">
+                                                            <Grid.ColumnDefinitions>
+                                                                <ColumnDefinition Width="24"/>
+                                                                <ColumnDefinition Width="*"/>
+                                                            </Grid.ColumnDefinitions>
+                                                            <Border Width="5" Height="5" CornerRadius="3" Background="{StaticResource Accent}"
+                                                                    VerticalAlignment="Top" Margin="2,8,0,0" HorizontalAlignment="Left"/>
+                                                            <TextBlock Grid.Column="1" app:GuideText.Rich="{Binding}" Style="{StaticResource TextBase}"
+                                                                       FontSize="13" LineHeight="21" TextWrapping="Wrap"/>
+                                                        </Grid>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+
+                                        <!-- Почему переключателя нет -->
+                                        <Border Background="{StaticResource BgSurface}" CornerRadius="{StaticResource RadiusSm}"
+                                                Padding="11,9" Margin="0,14,0,0"
+                                                Visibility="{Binding DisabledReason, Converter={StaticResource NullToVis}}">
+                                            <TextBlock Text="{Binding DisabledReason}" Style="{StaticResource TextMuted}"
+                                                       TextWrapping="Wrap"/>
+                                        </Border>
                                     </StackPanel>
-
-                                    <TextBlock Text="НАСКОЛЬКО ЭТО НАДЁЖНО" Style="{StaticResource GuideLabel}"
-                                               Margin="0,14,0,5"/>
-                                    <StackPanel Orientation="Horizontal">
-                                        <Ellipse Width="5" Height="5" VerticalAlignment="Center" Margin="0,0,8,0"
-                                                 Fill="{Binding Risk, Converter={StaticResource RiskBrush}}"/>
-                                        <TextBlock Text="{Binding RiskText}" Style="{StaticResource TextBody}"
-                                                   FontSize="{StaticResource FontSm}"/>
-                                    </StackPanel>
-                                    <TextBlock Text="{Binding ConfidenceText}" Style="{StaticResource TextMuted}"
-                                               Margin="13,4,0,0" TextWrapping="Wrap"/>
-
-                                    <StackPanel Orientation="Horizontal" Margin="13,4,0,0"
-                                                Visibility="{Binding RequiresReboot, Converter={StaticResource BoolToVis}}">
-                                        <TextBlock Text="Вступит в силу после перезагрузки"
-                                                   Style="{StaticResource TextMuted}"
-                                                   Foreground="{StaticResource Warning}"/>
-                                    </StackPanel>
-
-                                    <TextBlock Text="Нужны права администратора" Style="{StaticResource TextMuted}"
-                                               Margin="13,4,0,0"
-                                               Visibility="{Binding RequiresElevation, Converter={StaticResource BoolToVis}}"/>
-
-                                    <!-- Почему переключателя нет -->
-                                    <Border Background="{StaticResource BgInset}" CornerRadius="{StaticResource RadiusSm}"
-                                            Padding="11,9" Margin="0,14,0,0"
-                                            Visibility="{Binding DisabledReason, Converter={StaticResource NullToVis}}">
-                                        <TextBlock Text="{Binding DisabledReason}" Style="{StaticResource TextMuted}"
-                                                   TextWrapping="Wrap"/>
-                                    </Border>
-                                </StackPanel>
+                                </Border>
 
                             </StackPanel>
                         </Border>
@@ -238,6 +251,12 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </ScrollViewer>
+
+        <!-- Пустой результат: поиск ничего не нашёл или в наборе нет подходящих настроек -->
+        <StackPanel x:Name="EmptyState" Grid.Row="1" Margin="28,24,20,0" Visibility="Collapsed">
+            <TextBlock x:Name="EmptyTitle" Style="{StaticResource TextBase}" FontWeight="SemiBold"/>
+            <TextBlock x:Name="EmptyHint" Style="{StaticResource TextMuted}" Margin="0,4,0,0" TextWrapping="Wrap"/>
+        </StackPanel>
 
         <Border Grid.Row="2" Background="{StaticResource BgSurface}"
                 BorderBrush="{StaticResource BorderSubtle}" BorderThickness="0,1,0,0"
@@ -250,9 +269,9 @@
 
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
                     <Button x:Name="SelectAllButton" Style="{StaticResource ButtonGhost}"
-                            Content="Выбрать всё" Click="SelectAll_Click" Margin="0,0,8,0"/>
+                            Content="{app:T 'Выбрать всё'}" Click="SelectAll_Click" Margin="0,0,8,0"/>
                     <Button x:Name="ApplyButton" Style="{StaticResource ButtonPrimary}"
-                            Content="Применить" Click="Apply_Click" MinWidth="130"/>
+                            Content="{app:T 'Применить'}" Click="Apply_Click" MinWidth="130"/>
                 </StackPanel>
             </Grid>
         </Border>

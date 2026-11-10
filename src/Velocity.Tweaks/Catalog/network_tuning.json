@@ -1,0 +1,638 @@
+[
+  {
+    "Id": "net.qos_games",
+    "Category": "Network",
+    "Title": "Приоритет игрового трафика (QoS, DSCP 46)",
+    "Description": "Windows начинает помечать исходящие пакеты игры меткой DSCP 46 — «срочный трафик», как у голосовой связи. Сама метка ничего не ускоряет: она работает там, где устройство на пути её учитывает. Wi-Fi с WMM (это почти любой роутер) отправляет такие пакеты в приоритетную очередь, роутеры с QoS или SQM — тоже. Провайдер метку обычно сбрасывает, поэтому выигрыш есть на участке «компьютер — роутер». Но именно там, особенно на Wi-Fi, и возникает очередь, когда кто-то дома смотрит видео или качает.\n\nПолитики создаются для CS2, Valorant, Fortnite и Apex Legends. На домашнем компьютере вне домена Windows игнорирует политики QoS без служебного параметра «Do not use NLA» — он ставится вместе с ними и убирается при откате.",
+    "Effect": "Политики QoS с DSCP 46 для cs2.exe, VALORANT-Win64-Shipping.exe, FortniteClient-Win64-Shipping.exe, r5apex.exe, r5apex_dx12.exe",
+    "ExpectedGain": "Меньше пинг и потери, когда домашняя сеть загружена. На свободной сети — без изменений",
+    "Risk": "Safe",
+    "Confidence": "Documented",
+    "RequiresReboot": true,
+    "RequiresElevation": true,
+    "DetectAll": true,
+    "Presets": [
+      "Competitive",
+      "Maximum",
+      "Extreme"
+    ],
+    "Apply": [
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SYSTEM\\CurrentControlSet\\Services\\Tcpip\\QoS",
+        "Name": "Do not use NLA",
+        "Kind": "string",
+        "Value": "1"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY CS2",
+        "Name": "Version",
+        "Kind": "string",
+        "Value": "1.0"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY CS2",
+        "Name": "Application Name",
+        "Kind": "string",
+        "Value": "cs2.exe"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY CS2",
+        "Name": "Protocol",
+        "Kind": "string",
+        "Value": "*"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY CS2",
+        "Name": "Local Port",
+        "Kind": "string",
+        "Value": "*"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY CS2",
+        "Name": "Local IP",
+        "Kind": "string",
+        "Value": "*"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY CS2",
+        "Name": "Local IP Prefix Length",
+        "Kind": "string",
+        "Value": "*"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY CS2",
+        "Name": "Remote Port",
+        "Kind": "string",
+        "Value": "*"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY CS2",
+        "Name": "Remote IP",
+        "Kind": "string",
+        "Value": "*"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY CS2",
+        "Name": "Remote IP Prefix Length",
+        "Kind": "string",
+        "Value": "*"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY CS2",
+        "Name": "DSCP Value",
+        "Kind": "string",
+        "Value": "46"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY CS2",
+        "Name": "Throttle Rate",
+        "Kind": "string",
+        "Value": "-1"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY Valorant",
+        "Name": "Version",
+        "Kind": "string",
+        "Value": "1.0"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY Valorant",
+        "Name": "Application Name",
+        "Kind": "string",
+        "Value": "VALORANT-Win64-Shipping.exe"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY Valorant",
+        "Name": "Protocol",
+        "Kind": "string",
+        "Value": "*"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY Valorant",
+        "Name": "Local Port",
+        "Kind": "string",
+        "Value": "*"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY Valorant",
+        "Name": "Local IP",
+        "Kind": "string",
+        "Value": "*"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY Valorant",
+        "Name": "Local IP Prefix Length",
+        "Kind": "string",
+        "Value": "*"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY Valorant",
+        "Name": "Remote Port",
+        "Kind": "string",
+        "Value": "*"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY Valorant",
+        "Name": "Remote IP",
+        "Kind": "string",
+        "Value": "*"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY Valorant",
+        "Name": "Remote IP Prefix Length",
+        "Kind": "string",
+        "Value": "*"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY Valorant",
+        "Name": "DSCP Value",
+        "Kind": "string",
+        "Value": "46"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY Valorant",
+        "Name": "Throttle Rate",
+        "Kind": "string",
+        "Value": "-1"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY Fortnite",
+        "Name": "Version",
+        "Kind": "string",
+        "Value": "1.0"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY Fortnite",
+        "Name": "Application Name",
+        "Kind": "string",
+        "Value": "FortniteClient-Win64-Shipping.exe"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY Fortnite",
+        "Name": "Protocol",
+        "Kind": "string",
+        "Value": "*"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY Fortnite",
+        "Name": "Local Port",
+        "Kind": "string",
+        "Value": "*"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY Fortnite",
+        "Name": "Local IP",
+        "Kind": "string",
+        "Value": "*"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY Fortnite",
+        "Name": "Local IP Prefix Length",
+        "Kind": "string",
+        "Value": "*"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY Fortnite",
+        "Name": "Remote Port",
+        "Kind": "string",
+        "Value": "*"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY Fortnite",
+        "Name": "Remote IP",
+        "Kind": "string",
+        "Value": "*"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY Fortnite",
+        "Name": "Remote IP Prefix Length",
+        "Kind": "string",
+        "Value": "*"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY Fortnite",
+        "Name": "DSCP Value",
+        "Kind": "string",
+        "Value": "46"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY Fortnite",
+        "Name": "Throttle Rate",
+        "Kind": "string",
+        "Value": "-1"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY Apex",
+        "Name": "Version",
+        "Kind": "string",
+        "Value": "1.0"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY Apex",
+        "Name": "Application Name",
+        "Kind": "string",
+        "Value": "r5apex.exe"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY Apex",
+        "Name": "Protocol",
+        "Kind": "string",
+        "Value": "*"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY Apex",
+        "Name": "Local Port",
+        "Kind": "string",
+        "Value": "*"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY Apex",
+        "Name": "Local IP",
+        "Kind": "string",
+        "Value": "*"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY Apex",
+        "Name": "Local IP Prefix Length",
+        "Kind": "string",
+        "Value": "*"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY Apex",
+        "Name": "Remote Port",
+        "Kind": "string",
+        "Value": "*"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY Apex",
+        "Name": "Remote IP",
+        "Kind": "string",
+        "Value": "*"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY Apex",
+        "Name": "Remote IP Prefix Length",
+        "Kind": "string",
+        "Value": "*"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY Apex",
+        "Name": "DSCP Value",
+        "Kind": "string",
+        "Value": "46"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY Apex",
+        "Name": "Throttle Rate",
+        "Kind": "string",
+        "Value": "-1"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY Apex DX12",
+        "Name": "Version",
+        "Kind": "string",
+        "Value": "1.0"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY Apex DX12",
+        "Name": "Application Name",
+        "Kind": "string",
+        "Value": "r5apex_dx12.exe"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY Apex DX12",
+        "Name": "Protocol",
+        "Kind": "string",
+        "Value": "*"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY Apex DX12",
+        "Name": "Local Port",
+        "Kind": "string",
+        "Value": "*"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY Apex DX12",
+        "Name": "Local IP",
+        "Kind": "string",
+        "Value": "*"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY Apex DX12",
+        "Name": "Local IP Prefix Length",
+        "Kind": "string",
+        "Value": "*"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY Apex DX12",
+        "Name": "Remote Port",
+        "Kind": "string",
+        "Value": "*"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY Apex DX12",
+        "Name": "Remote IP",
+        "Kind": "string",
+        "Value": "*"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY Apex DX12",
+        "Name": "Remote IP Prefix Length",
+        "Kind": "string",
+        "Value": "*"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY Apex DX12",
+        "Name": "DSCP Value",
+        "Kind": "string",
+        "Value": "46"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\QoS\\VELOCITY Apex DX12",
+        "Name": "Throttle Rate",
+        "Kind": "string",
+        "Value": "-1"
+      }
+    ]
+  },
+  {
+    "Id": "net.nagle_off",
+    "Category": "Network",
+    "Title": "Отключить алгоритм Нейгла и отложенные подтверждения TCP",
+    "Description": "Алгоритм Нейгла копит мелкие TCP-пакеты и отправляет их пачкой, а отложенное подтверждение ждёт до 200 мс, прежде чем ответить «получено». Для скачивания это экономия, для игры — лишняя задержка. Настройка заставляет отправлять пакеты сразу на всех физических адаптерах.\n\nЧестно: Valorant, CS2, Fortnite и Apex передают игровой трафик по UDP, к которому алгоритм Нейгла не относится. Польза есть в играх и сервисах на TCP: MMO, League of Legends, часть лаунчеров и голосовых чатов.",
+    "Effect": "TcpAckFrequency = 1 и TCPNoDelay = 1 для каждого физического сетевого адаптера",
+    "ExpectedGain": "Для UDP-шутеров — ноль. Для игр на TCP — меньше задержка отправки мелких пакетов",
+    "Risk": "Safe",
+    "Confidence": "Community",
+    "RequiresElevation": true,
+    "DetectAll": true,
+    "Presets": [
+      "Competitive",
+      "Maximum",
+      "Extreme"
+    ],
+    "Apply": [
+      {
+        "type": "registry_each",
+        "Scope": "tcp_interfaces",
+        "Name": "TcpAckFrequency",
+        "Kind": "dword",
+        "Value": "1"
+      },
+      {
+        "type": "registry_each",
+        "Scope": "tcp_interfaces",
+        "Name": "TCPNoDelay",
+        "Kind": "dword",
+        "Value": "1"
+      }
+    ]
+  },
+  {
+    "Id": "net.adapter_power_saving_off",
+    "Category": "Network",
+    "Title": "Отключить энергосбережение сетевой карты",
+    "Description": "Сетевые карты умеют экономить энергию: Energy-Efficient Ethernet и Green Ethernet усыпляют линию между пакетами, а Windows может выключать саму карту. Пробуждение занимает время и иногда сопровождается коротким обрывом — в игре это выглядит как скачок пинга или потеря пакетов на ровном месте.\n\nМеняются только те параметры, которые объявил драйвер именно твоей карты, плюс запрет Windows отключать устройство ради экономии. Сетевой адаптер применит изменения после перезагрузки.",
+    "Effect": "EEE, Green Ethernet и режим энергосбережения драйвера — выключены; Windows не отключает карту для экономии",
+    "ExpectedGain": "Пропадают редкие скачки пинга после простоя линии. При ровной сети — без изменений",
+    "Risk": "Safe",
+    "Confidence": "Documented",
+    "RequiresReboot": true,
+    "RequiresElevation": true,
+    "DetectAll": true,
+    "Requires": [
+      "machine.is_laptop=false"
+    ],
+    "Presets": [
+      "Gaming",
+      "Competitive",
+      "Maximum",
+      "Extreme"
+    ],
+    "Apply": [
+      {
+        "type": "registry_each",
+        "Scope": "net_adapters",
+        "Name": "*EEE",
+        "Kind": "string",
+        "Value": "0",
+        "OnlyIfExists": true
+      },
+      {
+        "type": "registry_each",
+        "Scope": "net_adapters",
+        "Name": "AdvancedEEE",
+        "Kind": "string",
+        "Value": "0",
+        "OnlyIfExists": true
+      },
+      {
+        "type": "registry_each",
+        "Scope": "net_adapters",
+        "Name": "EEELinkAdvertisement",
+        "Kind": "string",
+        "Value": "0",
+        "OnlyIfExists": true
+      },
+      {
+        "type": "registry_each",
+        "Scope": "net_adapters",
+        "Name": "EnableGreenEthernet",
+        "Kind": "string",
+        "Value": "0",
+        "OnlyIfExists": true
+      },
+      {
+        "type": "registry_each",
+        "Scope": "net_adapters",
+        "Name": "PowerSavingMode",
+        "Kind": "string",
+        "Value": "0",
+        "OnlyIfExists": true
+      },
+      {
+        "type": "registry_each",
+        "Scope": "net_adapters",
+        "Name": "ULPMode",
+        "Kind": "string",
+        "Value": "0",
+        "OnlyIfExists": true
+      },
+      {
+        "type": "registry_each",
+        "Scope": "net_adapters",
+        "Name": "PnPCapabilities",
+        "Kind": "dword",
+        "Value": "24"
+      }
+    ]
+  },
+  {
+    "Id": "net.interrupt_moderation_off",
+    "Category": "Network",
+    "Title": "Отключить объединение прерываний сетевой карты",
+    "Description": "Interrupt Moderation заставляет карту копить пришедшие пакеты и сообщать о них процессору пачкой. Это снижает нагрузку при скачивании на гигабитной скорости, но каждый игровой пакет ждёт, пока соберётся пачка. Отключение доставляет пакеты сразу.\n\nЦена — больше прерываний и чуть выше нагрузка на процессор во время больших загрузок: обновлений игр, торрентов.",
+    "Effect": "*InterruptModeration = 0 у адаптеров, драйвер которых поддерживает параметр",
+    "ExpectedGain": "Десятки микросекунд на каждый пакет. В игре не ощущается, в LatencyMon — видно",
+    "Risk": "Moderate",
+    "Confidence": "Community",
+    "RequiresReboot": true,
+    "RequiresElevation": true,
+    "Presets": [
+      "Maximum",
+      "Extreme"
+    ],
+    "Apply": [
+      {
+        "type": "registry_each",
+        "Scope": "net_adapters",
+        "Name": "*InterruptModeration",
+        "Kind": "string",
+        "Value": "0",
+        "OnlyIfExists": true
+      }
+    ]
+  },
+  {
+    "Id": "net.wifi_power_max",
+    "Category": "Network",
+    "Title": "Wi-Fi без энергосбережения",
+    "Description": "Схема питания разрешает адаптеру Wi-Fi засыпать между пакетами. Даже «средняя экономия» добавляет задержку пробуждения и делает пинг рваным. Режим «Максимальная производительность» держит радиомодуль активным, пока компьютер работает от сети. От батареи ноутбук продолжит экономить.",
+    "Effect": "Параметры адаптера беспроводной сети → Режим энергосбережения = Максимальная производительность (от сети)",
+    "ExpectedGain": "Меньше скачков пинга по Wi-Fi на 10–50 мс. Кабель всё равно надёжнее",
+    "Risk": "Safe",
+    "Confidence": "Documented",
+    "RequiresElevation": true,
+    "Requires": [
+      "network.has_wifi=true"
+    ],
+    "Presets": [
+      "Gaming",
+      "Competitive",
+      "Maximum",
+      "Extreme",
+      "Laptop"
+    ],
+    "Apply": [
+      {
+        "type": "powercfg",
+        "Operation": "setvalue",
+        "SubGroupGuid": "19cbb8fa-5279-450e-9fac-8a3d5fedd0c1",
+        "SettingGuid": "12bbebe6-58d6-4636-95bb-3217ef867c1a",
+        "AcValue": 0
+      }
+    ]
+  }
+]

@@ -1,3 +1,4 @@
+using System.IO;
 using System.Collections.ObjectModel;
 using System.ComponentModel;
 using System.Runtime.CompilerServices;
@@ -44,20 +45,20 @@ public sealed class JunkItem : INotifyPropertyChanged
 
     public string Title => Finding.Target.Title;
     public string Description => Finding.Target.Description;
-    public string Consequence => Finding.Target.Consequence ?? "Ничего существенного.";
+    public string Consequence => Finding.Target.Consequence ?? Loc.T("Ничего существенного.");
     public string SizeText => Finding.SizeText;
     public List<string> Locations => [.. Finding.Locations.Select(l => $"{l.Path}  —  {Format.Size(l.Size)}")];
 
     public string LocationSummary => Finding.Locations.Count == 1
         ? Finding.Locations[0].Path
-        : $"{Plural.With(Finding.Locations.Count, "папка", "папки", "папок")} · " +
-          $"{Plural.With(Finding.FileCount, "файл", "файла", "файлов")}";
+        : $"{Loc.Plural(Finding.Locations.Count, Loc.T("папка"), Loc.T("папки"), Loc.T("папок"))} · " +
+          $"{Loc.Plural(Finding.FileCount, Loc.T("файл"), Loc.T("файла"), Loc.T("файлов"))}";
 
     public string SafetyLabel => Finding.Target.Safety switch
     {
-        CleanupSafety.Safe => "БЕЗОПАСНО",
-        CleanupSafety.Regenerates => "СОЗДАСТСЯ ЗАНОВО",
-        _ => "БЕЗ ВОЗВРАТА"
+        CleanupSafety.Safe => Loc.T("Безопасно"),
+        CleanupSafety.Regenerates => Loc.T("Создастся заново"),
+        _ => Loc.T("Без возврата")
     };
 
     public Brush SafetyBrush => (Brush)Application.Current.Resources[Finding.Target.Safety switch
@@ -83,10 +84,10 @@ internal static class Format
 {
     public static string Size(long bytes) => bytes switch
     {
-        >= 1024L * 1024 * 1024 => $"{bytes / 1024d / 1024d / 1024d:0.##} ГБ",
-        >= 1024L * 1024 => $"{bytes / 1024d / 1024d:0.#} МБ",
-        >= 1024 => $"{bytes / 1024} КБ",
-        _ => $"{bytes} Б"
+        >= 1024L * 1024 * 1024 => Loc.F("{0:0.##} ГБ", bytes / 1024d / 1024d / 1024d),
+        >= 1024L * 1024 => Loc.F("{0:0.#} МБ", bytes / 1024d / 1024d),
+        >= 1024 => Loc.F("{0} КБ", bytes / 1024),
+        _ => Loc.F("{0} Б", bytes)
     };
 }
 
@@ -129,10 +130,10 @@ public partial class CleanupView : UserControl
 
         _busy = true;
         _scanCancel = new CancellationTokenSource();
-        ScanButton.Content = "Остановить";
-        SubtitleText.Text = "Считаю размеры папок…";
+        ScanButton.Content = Loc.T("Остановить");
+        SubtitleText.Text = Loc.T("Считаю размеры папок…");
 
-        var progress = new Progress<string>(name => SubtitleText.Text = $"Считаю: {name}");
+        var progress = new Progress<string>(name => SubtitleText.Text = Loc.F("Считаю: {0}", name));
 
         try
         {
@@ -141,31 +142,41 @@ public partial class CleanupView : UserControl
             var (usage, junk) = await Task.Run(() =>
             {
                 var u = new DiskUsageScanner().Scan(drive, games, progress, _scanCancel.Token);
-                // Мусор ищем по всей системе, а не только на выбранном диске:
-                // кэши и временные файлы почти всегда лежат на системном.
-                var j = new CleanupScanner().Scan();
+                // Мусор — только на выбранном диске: иначе после скана D: программа
+                // предлагала бы удалить кэши с C:, и было бы непонятно, что где освободится.
+                var j = new CleanupScanner().Scan(driveRoot: drive);
                 return (u, j);
             }, _scanCancel.Token);
 
             RenderUsage(usage);
-            RenderJunk(junk);
+            RenderJunk(junk, drive);
         }
         catch (OperationCanceledException)
         {
-            SubtitleText.Text = "Сканирование остановлено";
+            SubtitleText.Text = Loc.T("Сканирование остановлено");
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Не удалось просканировать диск: {ex.Message}", "VELOCITY",
+            MessageBox.Show(Loc.F("Не удалось просканировать диск: {0}", ex.Message), "VELOCITY",
                 MessageBoxButton.OK, MessageBoxImage.Warning);
         }
         finally
         {
             _busy = false;
-            ScanButton.Content = "Сканировать";
+            ScanButton.Content = Loc.T("Сканировать");
             _scanCancel?.Dispose();
             _scanCancel = null;
         }
+    }
+
+    /// <summary>Переключиться на системный диск и сразу просканировать его.</summary>
+    private void SystemDrive_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { Tag: string system }) return;
+        var match = DriveSelector.Items.Cast<object>().FirstOrDefault(d => string.Equals(d as string, system, StringComparison.OrdinalIgnoreCase));
+        if (match is null) return;
+        DriveSelector.SelectedItem = match;
+        Scan_Click(sender, e);
     }
 
     private void RenderUsage(DiskUsageReport usage)
@@ -178,7 +189,7 @@ public partial class CleanupView : UserControl
             slices.Add(new UsageSlice
             {
                 Name = entry.Name,
-                Hint = entry.IsGames ? "здесь установлены игры" : null,
+                Hint = entry.IsGames ? Loc.T("здесь установлены игры") : null,
                 SizeBytes = entry.SizeBytes,
                 Percent = entry.Percent,
                 Color = Brush(SliceColors[colorIndex++ % SliceColors.Length])
@@ -191,8 +202,8 @@ public partial class CleanupView : UserControl
         {
             slices.Add(new UsageSlice
             {
-                Name = "Остальное",
-                Hint = "мелкие папки и защищённые системные каталоги",
+                Name = Loc.T("Остальное"),
+                Hint = Loc.T("мелкие папки и защищённые системные каталоги"),
                 SizeBytes = rest,
                 Percent = usage.UsedBytes > 0 ? rest * 100.0 / usage.UsedBytes : 0,
                 Color = Brush("#3A4250")
@@ -202,8 +213,8 @@ public partial class CleanupView : UserControl
         UsageLegend.ItemsSource = slices;
         BuildBar(slices);
 
-        UsageSummary.Text = $"занято {usage.UsedGb} ГБ из {usage.TotalGb} · " +
-                            $"свободно {usage.FreeGb} ГБ ({usage.FreePercent:0}%)";
+        UsageSummary.Text = Loc.F("занято {0} ГБ из {1} · ", usage.UsedGb, usage.TotalGb) +
+                            Loc.F("свободно {0} ГБ ({1:0}%)", usage.FreeGb, usage.FreePercent);
         UsagePanel.Visibility = Visibility.Visible;
     }
 
@@ -237,8 +248,17 @@ public partial class CleanupView : UserControl
         UsageBar.Items.Add(host);
     }
 
-    private void RenderJunk(List<CleanupFinding> findings)
+    private void RenderJunk(List<CleanupFinding> findings, string drive)
     {
+        var system = Path.GetPathRoot(Environment.SystemDirectory) ?? "C:\\";
+        bool otherDrive = !string.Equals(drive, system, StringComparison.OrdinalIgnoreCase);
+        EmptyTitle.Text = otherDrive ? Loc.F("На диске {0} мусора нет", drive.TrimEnd('\\')) : Loc.T("Мусора не найдено");
+        EmptyText.Text = otherDrive
+            ? Loc.F("Временные файлы, кэши драйверов, браузеров и лаунчеров Windows хранит на системном диске {0}. Выбери его, чтобы их найти.", system.TrimEnd('\\'))
+            : Loc.T("Временные файлы, кэши драйверов и остатки обновлений либо отсутствуют, либо занимают незначительное место.");
+        SystemDriveButton.Visibility = otherDrive ? Visibility.Visible : Visibility.Collapsed;
+        SystemDriveButton.Tag = system;
+
         _junk.Clear();
 
         foreach (var finding in findings)
@@ -262,8 +282,8 @@ public partial class CleanupView : UserControl
         EmptyState.Visibility = findings.Count > 0 ? Visibility.Collapsed : Visibility.Visible;
 
         SubtitleText.Text = findings.Count > 0
-            ? $"Можно освободить до {Format.Size(total)}"
-            : "Мусора не найдено";
+            ? Loc.F("На диске {0} можно освободить до {1}", drive.TrimEnd('\\'), Format.Size(total))
+            : EmptyTitle.Text;
 
         UpdateSelection();
     }
@@ -274,13 +294,13 @@ public partial class CleanupView : UserControl
         long total = selected.Sum(j => j.Finding.SizeBytes);
 
         SelectionText.Text = selected.Count == 0
-            ? "Ничего не выбрано"
-            : $"Выбрано {Plural.With(selected.Count, "категория", "категории", "категорий")} · {Format.Size(total)}";
+            ? Loc.T("Ничего не выбрано")
+            : Loc.F("Выбрано {0} · {1}", Loc.Plural(selected.Count, Loc.T("категория"), Loc.T("категории"), Loc.T("категорий")), Format.Size(total));
 
         bool risky = selected.Any(j => j.Finding.Target.Safety == CleanupSafety.PointOfNoReturn);
         SelectionHint.Text = risky
-            ? "Среди выбранного есть то, что нельзя будет вернуть"
-            : "Удаление необратимо — точки отката на файлы не распространяются";
+            ? Loc.T("Среди выбранного есть то, что нельзя будет вернуть")
+            : Loc.T("Удаление необратимо — точки отката на файлы не распространяются");
 
         CleanButton.IsEnabled = selected.Count > 0;
     }
@@ -303,7 +323,7 @@ public partial class CleanupView : UserControl
         {
             var names = string.Join(Environment.NewLine, needElevation.Select(j => "  • " + j.Title));
             if (Elevation.RequestRestart(
-                    $"Для части категорий нужны права администратора:{Environment.NewLine}{Environment.NewLine}{names}"))
+                    Loc.F("Для части категорий нужны права администратора:{0}{1}{2}", Environment.NewLine, Environment.NewLine, names)))
                 return;
         }
 
@@ -312,19 +332,19 @@ public partial class CleanupView : UserControl
 
         var warning = risky.Count > 0
             ? Environment.NewLine + Environment.NewLine +
-              "Внимание: " + string.Join("; ", risky.Select(j => j.Consequence))
+              Loc.T("Внимание: ") + string.Join("; ", risky.Select(j => j.Consequence))
             : "";
 
         var answer = MessageBox.Show(
-            $"Будет удалено:{Environment.NewLine}{Environment.NewLine}{list}{Environment.NewLine}" +
-            $"{Environment.NewLine}Всего: {Format.Size(expected)}{warning}{Environment.NewLine}" +
-            $"{Environment.NewLine}Файлы удаляются мимо корзины. Продолжить?",
-            "Подтверждение очистки", MessageBoxButton.YesNo, MessageBoxImage.Warning);
+            Loc.F("Будет удалено:{0}{1}{2}{3}", Environment.NewLine, Environment.NewLine, list, Environment.NewLine) +
+            Loc.F("{0}Всего: {1}{2}{3}", Environment.NewLine, Format.Size(expected), warning, Environment.NewLine) +
+            Loc.F("{0}Файлы удаляются мимо корзины. Продолжить?", Environment.NewLine),
+            Loc.T("Подтверждение очистки"), MessageBoxButton.YesNo, MessageBoxImage.Warning);
 
         if (answer != MessageBoxResult.Yes) return;
 
         CleanButton.IsEnabled = false;
-        CleanButton.Content = "Удаляю…";
+        CleanButton.Content = Loc.T("Удаляю…");
 
         var results = await Task.Run(() =>
         {
@@ -332,25 +352,25 @@ public partial class CleanupView : UserControl
             return selected.Select(j => scanner.Clean(j.Finding)).ToList();
         });
 
-        CleanButton.Content = "Удалить выбранное";
+        CleanButton.Content = Loc.T("Удалить выбранное");
 
         long freed = results.Sum(r => r.FreedBytes);
         int files = results.Sum(r => r.DeletedFiles);
         var errors = results.SelectMany(r => r.Errors).Take(5).ToList();
 
-        var text = $"Освобождено: {Format.Size(freed)}{Environment.NewLine}" +
-                   $"Удалено файлов: {files}";
+        var text = Loc.F("Освобождено: {0}{1}", Format.Size(freed), Environment.NewLine) +
+                   Loc.F("Удалено файлов: {0}", files);
 
         if (freed < expected * 0.8)
             text += Environment.NewLine + Environment.NewLine +
-                    "Часть файлов была занята работающими программами и осталась на месте. " +
-                    "Закрой лаунчеры и Discord, затем просканируй снова.";
+                    Loc.T("Часть файлов была занята работающими программами и осталась на месте. ") +
+                    Loc.T("Закрой лаунчеры и Discord, затем просканируй снова.");
 
         if (errors.Count > 0)
-            text += Environment.NewLine + Environment.NewLine + "Не удалось:" + Environment.NewLine +
+            text += Environment.NewLine + Environment.NewLine + Loc.T("Не удалось:") + Environment.NewLine +
                     string.Join(Environment.NewLine, errors.Select(x => "  • " + x));
 
-        MessageBox.Show(text, "Очистка завершена", MessageBoxButton.OK, MessageBoxImage.Information);
+        MessageBox.Show(text, Loc.T("Очистка завершена"), MessageBoxButton.OK, MessageBoxImage.Information);
 
         Scan_Click(sender, e);
     }

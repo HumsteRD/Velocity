@@ -1,3 +1,4 @@
+using Velocity.Core;
 using System.Diagnostics;
 using System.Runtime.Versioning;
 
@@ -29,10 +30,10 @@ public static class CommandExecutor
     {
         if (!Allowed.Contains(action.Executable))
             throw new InvalidOperationException(
-                $"Запуск «{action.Executable}» запрещён: утилиты нет в белом списке");
+                L10n.F("Запуск «{0}» запрещён: утилиты нет в белом списке", action.Executable));
 
         if (action.Arguments.IndexOfAny(Forbidden) >= 0)
-            throw new InvalidOperationException("В аргументах есть символы объединения команд");
+            throw new InvalidOperationException(L10n.T("В аргументах есть символы объединения команд"));
 
         var psi = new ProcessStartInfo(action.Executable, action.Arguments)
         {
@@ -44,13 +45,13 @@ public static class CommandExecutor
         };
 
         using var proc = Process.Start(psi)
-            ?? throw new InvalidOperationException($"{action.Executable} не запустился");
+            ?? throw new InvalidOperationException(L10n.F("{0} не запустился", action.Executable));
 
         var error = proc.StandardError.ReadToEnd();
         proc.WaitForExit(30_000);
 
         if (proc.HasExited && proc.ExitCode != 0)
             throw new InvalidOperationException(
-                $"{action.Executable} вернул код {proc.ExitCode}. {error.Trim()}");
+                L10n.F("{0} вернул код {1}. {2}", action.Executable, proc.ExitCode, error.Trim()));
     }
 }

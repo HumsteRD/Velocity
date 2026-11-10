@@ -2,24 +2,22 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:app="clr-namespace:Velocity.App"
-             Background="{StaticResource BgBase}">
-
+             xmlns:primitives="clr-namespace:System.Windows.Controls.Primitives;assembly=PresentationFramework"
+             Background="Transparent">
     <UserControl.Resources>
         <app:SeverityBrushConverter x:Key="SeverityBrush"/>
         <app:SeverityLabelConverter x:Key="SeverityLabel"/>
         <app:NullToVisibilityConverter x:Key="NullToVis"/>
-
-        <!-- Строка «метка — значение». Основной способ подачи данных в этом интерфейсе:
-             плотно, выровнено по колонке, без карточек вокруг каждого факта. -->
         <DataTemplate x:Key="SpecRow">
-            <Grid Margin="0,0,0,7">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="112"/>
-                    <ColumnDefinition Width="*"/>
-                </Grid.ColumnDefinitions>
-                <TextBlock Grid.Column="0" Text="{Binding Label}" Style="{StaticResource TextMuted}"/>
-                <TextBlock Grid.Column="1" Text="{Binding Value}" Style="{StaticResource TextBase}"
-                           TextTrimming="CharacterEllipsis"/>
+            <Grid Margin="0,0,22,14">
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+                <TextBlock Text="{Binding Label}" Style="{StaticResource TextMuted}"/>
+                <TextBlock Grid.Row="1" Text="{Binding Value}" Style="{StaticResource TextBase}"
+                           Margin="0,3,0,0" FontSize="{StaticResource FontSm}"
+                           FontWeight="SemiBold" TextTrimming="CharacterEllipsis"/>
             </Grid>
         </DataTemplate>
     </UserControl.Resources>
@@ -30,153 +28,148 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- ─────────── Шапка раздела ─────────── -->
-        <Grid Grid.Row="0" Margin="28,24,28,18">
+        <Grid Grid.Row="0" Margin="32,28,32,22">
             <StackPanel>
-                <TextBlock Text="Обзор системы" Style="{StaticResource TextTitle}"/>
-                <TextBlock x:Name="SubtitleText" Style="{StaticResource TextMuted}" Margin="0,4,0,0"
-                           Text="Сканирование…"/>
+                <TextBlock Text="{app:T 'Обзор системы'}" Style="{StaticResource TextTitle}"/>
+                <TextBlock x:Name="SubtitleText" Style="{StaticResource TextMuted}" Margin="0,5,0,0"
+                           Text="{app:T 'Сканирование…'}"/>
             </StackPanel>
-            <Button x:Name="RescanButton" Style="{StaticResource ButtonSecondary}"
-                    Content="Пересканировать" HorizontalAlignment="Right" VerticalAlignment="Top"
+            <Button x:Name="RescanButton" Style="{StaticResource ButtonCompact}"
+                    Content="{app:T 'Пересканировать'}" HorizontalAlignment="Right" VerticalAlignment="Center"
                     Click="Rescan_Click"/>
         </Grid>
 
-        <ScrollViewer Grid.Row="1" Style="{StaticResource CleanScrollViewer}" Padding="28,0,20,24">
-            <StackPanel>
+        <ScrollViewer Grid.Row="1" Style="{StaticResource CleanScrollViewer}" Padding="32,0,24,30">
+            <StackPanel MaxWidth="1040" HorizontalAlignment="Left">
+                <Border Style="{StaticResource GroupPanel}">
+                    <Grid x:Name="HeroGrid" SizeChanged="Hero_SizeChanged">
+                    <Grid Margin="24,20">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="176"/>
+                            <ColumnDefinition Width="1"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
 
-                <!-- ─────────── Оценка и конфигурация ─────────── -->
-                <Grid>
-                    <Grid.ColumnDefinitions>
-                        <ColumnDefinition Width="264"/>
-                        <ColumnDefinition Width="14"/>
-                        <ColumnDefinition Width="*"/>
-                    </Grid.ColumnDefinitions>
-
-                    <Border Grid.Column="0" Style="{StaticResource Card}" Padding="20,18">
-                        <StackPanel>
-                            <TextBlock Text="ОЦЕНКА СИСТЕМЫ" Style="{StaticResource TextLabel}"/>
-
-                            <StackPanel Orientation="Horizontal" Margin="0,14,0,0">
+                        <StackPanel Grid.Column="0">
+                            <TextBlock Text="{app:T 'Готовность системы'}" Style="{StaticResource TextLabel}"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,7,0,0">
                                 <TextBlock x:Name="ScoreValue" Text="—" Style="{StaticResource TextMetric}"
                                            FontSize="{StaticResource Font3xl}" FontWeight="SemiBold"/>
                                 <TextBlock Text="/100" Style="{StaticResource TextMuted}"
                                            VerticalAlignment="Bottom" Margin="4,0,0,8"/>
                             </StackPanel>
-
-                            <!-- Шкала: тонкая полоса вместо кругового индикатора.
-                                 Кольцо занимает много места и хуже читается боковым зрением. -->
+                            <TextBlock x:Name="ScoreLabel" Text="" Style="{StaticResource TextSection}"
+                                       Margin="0,2,0,0" Foreground="{StaticResource AccentInk}"/>
                             <Border Height="4" Background="{StaticResource BgInset}" CornerRadius="2"
-                                    Margin="0,10,0,0">
+                                    Margin="0,12,0,0">
                                 <Border x:Name="ScoreBar" HorizontalAlignment="Left" Width="0"
                                         Background="{StaticResource Accent}" CornerRadius="2"/>
                             </Border>
+                        </StackPanel>
 
-                            <TextBlock x:Name="ScoreLabel" Text="" Margin="0,10,0,0"
-                                       Style="{StaticResource TextBase}" FontWeight="SemiBold"/>
+                        <Border Grid.Column="1" Background="{StaticResource BorderSubtle}" Margin="24,0"/>
 
-                            <Border Height="1" Background="{StaticResource BorderSubtle}" Margin="0,16"/>
-
-                            <Grid>
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*"/>
-                                    <ColumnDefinition Width="*"/>
-                                </Grid.ColumnDefinitions>
-                                <StackPanel Grid.Column="0">
+                        <StackPanel Grid.Column="2" VerticalAlignment="Center">
+                            <TextBlock Text="{app:T 'Сейчас'}" Style="{StaticResource TextLabel}"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,10,0,0">
+                                <StackPanel Width="150">
                                     <TextBlock x:Name="ProblemCount" Text="—" Style="{StaticResource TextMetric}"
                                                FontSize="{StaticResource FontXl}"/>
-                                    <TextBlock Text="проблем" Style="{StaticResource TextMuted}" Margin="0,2,0,0"/>
+                                    <TextBlock Text="{app:T 'требуют внимания'}" Style="{StaticResource TextMuted}" Margin="0,2,0,0"/>
                                 </StackPanel>
-                                <StackPanel Grid.Column="1">
+                                <StackPanel Width="150">
                                     <TextBlock x:Name="FixableCount" Text="—" Style="{StaticResource TextMetric}"
-                                               FontSize="{StaticResource FontXl}" Foreground="{StaticResource Accent}"/>
-                                    <TextBlock Text="исправим сами" Style="{StaticResource TextMuted}" Margin="0,2,0,0"/>
+                                               FontSize="{StaticResource FontXl}" Foreground="{StaticResource AccentInk}"/>
+                                    <TextBlock Text="{app:T 'можно исправить'}" Style="{StaticResource TextMuted}" Margin="0,2,0,0"/>
                                 </StackPanel>
-                            </Grid>
+                                <StackPanel>
+                                    <TextBlock x:Name="GameCount" Text="—" Style="{StaticResource TextMetric}"
+                                               FontSize="{StaticResource FontXl}"/>
+                                    <TextBlock Text="{app:T 'игр найдено'}" Style="{StaticResource TextMuted}" Margin="0,2,0,0"/>
+                                </StackPanel>
+                            </StackPanel>
+                            <StackPanel Orientation="Horizontal" Margin="0,13,0,0">
+                                <Button Content="{app:T 'К оптимизациям →'}" Style="{StaticResource ButtonLink}"
+                                        Tag="Optimize" Click="OpenSection_Click"/>
+                                <Button Content="{app:T 'Приватность и фон →'}" Style="{StaticResource ButtonLink}"
+                                        Margin="22,0,0,0" Tag="Privacy" Click="OpenSection_Click"/>
+                            </StackPanel>
                         </StackPanel>
-                    </Border>
+                    </Grid>
+                    </Grid>
+                </Border>
 
-                    <Border Grid.Column="2" Style="{StaticResource Card}" Padding="20,18">
-                        <StackPanel>
-                            <TextBlock Text="КОНФИГУРАЦИЯ" Style="{StaticResource TextLabel}" Margin="0,0,0,14"/>
-                            <ItemsControl x:Name="SpecList" ItemTemplate="{StaticResource SpecRow}"/>
-                        </StackPanel>
-                    </Border>
-                </Grid>
+                <TextBlock Text="{app:T 'Конфигурация'}" Style="{StaticResource TextLabel}" Margin="2,28,0,9"/>
+                <Border Style="{StaticResource GroupPanel}" Padding="24,20,2,8">
+                    <ItemsControl x:Name="SpecList" ItemTemplate="{StaticResource SpecRow}">
+                        <ItemsControl.ItemsPanel>
+                            <ItemsPanelTemplate>
+                                <primitives:UniformGrid Columns="2"/>
+                            </ItemsPanelTemplate>
+                        </ItemsControl.ItemsPanel>
+                    </ItemsControl>
+                </Border>
 
-                <!-- ─────────── Находки ─────────── -->
-
-                <TextBlock x:Name="FindingsHeader" Text="НАЙДЕННЫЕ ПРОБЛЕМЫ"
-                           Style="{StaticResource TextLabel}" Margin="2,26,0,10"/>
-
-                <ItemsControl x:Name="FindingsList">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Border Style="{StaticResource Card}" Margin="0,0,0,8" Padding="18,15">
-                                <Grid>
-                                    <Grid.ColumnDefinitions>
-                                        <ColumnDefinition Width="3"/>
-                                        <ColumnDefinition Width="*"/>
-                                        <ColumnDefinition Width="Auto"/>
-                                    </Grid.ColumnDefinitions>
-
-                                    <!-- Цветом отмечается только узкая полоса слева.
-                                         Заливать карточку целиком — превратить список в светофор. -->
-                                    <Rectangle Grid.Column="0" Width="3" RadiusX="2" RadiusY="2"
-                                               VerticalAlignment="Stretch" Margin="-18,-15,0,-15"
-                                               Fill="{Binding Severity, Converter={StaticResource SeverityBrush}}"/>
-
-                                    <StackPanel Grid.Column="1" Margin="16,0,0,0">
-                                        <StackPanel Orientation="Horizontal" Margin="0,0,0,6">
-                                            <TextBlock Text="{Binding Severity, Converter={StaticResource SeverityLabel}}"
-                                                       Style="{StaticResource TextLabel}"
-                                                       Foreground="{Binding Severity, Converter={StaticResource SeverityBrush}}"/>
+                <TextBlock x:Name="FindingsHeader" Text="{app:T 'Требует внимания'}"
+                           Style="{StaticResource TextLabel}" Margin="2,28,0,9"/>
+                <Border x:Name="FindingsPanel" Style="{StaticResource GroupPanel}">
+                    <ItemsControl x:Name="FindingsList">
+                        <ItemsControl.ItemTemplate>
+                            <DataTemplate>
+                                <Border BorderBrush="{StaticResource BorderSubtle}" BorderThickness="0,0,0,1" Padding="24,18">
+                                    <Grid>
+                                        <Grid.ColumnDefinitions>
+                                            <ColumnDefinition Width="3"/>
+                                            <ColumnDefinition Width="*"/>
+                                            <ColumnDefinition Width="Auto"/>
+                                        </Grid.ColumnDefinitions>
+                                        <Rectangle Grid.Column="0" Width="3" RadiusX="2" RadiusY="2"
+                                                   VerticalAlignment="Stretch" Margin="-24,-18,0,-18"
+                                                   Fill="{Binding Severity, Converter={StaticResource SeverityBrush}}"/>
+                                        <StackPanel Grid.Column="1" Margin="17,0,0,0">
+                                            <Border Style="{StaticResource Badge}" HorizontalAlignment="Left">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Ellipse Style="{StaticResource BadgeDot}"
+                                                             Fill="{Binding Severity, Converter={StaticResource SeverityBrush}}"/>
+                                                    <TextBlock Text="{Binding Severity, Converter={StaticResource SeverityLabel}}"
+                                                               Style="{StaticResource BadgeText}"
+                                                               Foreground="{Binding Severity, Converter={StaticResource SeverityBrush}}"/>
+                                                </StackPanel>
+                                            </Border>
+                                            <TextBlock Text="{Binding Title}" Style="{StaticResource TextBase}"
+                                                       FontWeight="SemiBold" Margin="0,6,0,0" TextWrapping="Wrap"/>
+                                            <TextBlock Text="{Binding Detail}" Style="{StaticResource TextBody}"
+                                                       Margin="0,6,0,0" FontSize="{StaticResource FontSm}"/>
+                                            <StackPanel Orientation="Horizontal" Margin="0,10,0,0"
+                                                        Visibility="{Binding Recommendation, Converter={StaticResource NullToVis}}">
+                                                <TextBlock Text="→" Foreground="{StaticResource AccentInk}" Style="{StaticResource TextBase}"/>
+                                                <TextBlock Text="{Binding Recommendation}" Margin="8,0,0,0"
+                                                           Style="{StaticResource TextBase}" FontSize="{StaticResource FontSm}"
+                                                           TextWrapping="Wrap"/>
+                                            </StackPanel>
+                                            <TextBlock Text="{Binding ExpectedGain}" Style="{StaticResource TextMuted}"
+                                                       Margin="18,4,0,0" TextWrapping="Wrap"
+                                                       Visibility="{Binding ExpectedGain, Converter={StaticResource NullToVis}}"/>
                                         </StackPanel>
+                                        <Button Grid.Column="2" Content="{app:T 'Исправить'}" Style="{StaticResource ButtonCompact}"
+                                                VerticalAlignment="Top" Margin="18,0,0,0" Tag="{Binding FixTweakId}"
+                                                Click="Fix_Click" Visibility="{Binding FixTweakId, Converter={StaticResource NullToVis}}"/>
+                                    </Grid>
+                                </Border>
+                            </DataTemplate>
+                        </ItemsControl.ItemTemplate>
+                    </ItemsControl>
+                </Border>
 
-                                        <TextBlock Text="{Binding Title}" Style="{StaticResource TextBase}"
-                                                   FontWeight="SemiBold" TextWrapping="Wrap"/>
-
-                                        <TextBlock Text="{Binding Detail}" Style="{StaticResource TextBody}"
-                                                   Margin="0,6,0,0" FontSize="{StaticResource FontSm}"/>
-
-                                        <StackPanel Orientation="Horizontal" Margin="0,10,0,0"
-                                                    Visibility="{Binding Recommendation, Converter={StaticResource NullToVis}}">
-                                            <TextBlock Text="→" Foreground="{StaticResource Accent}"
-                                                       Style="{StaticResource TextBase}" VerticalAlignment="Top"/>
-                                            <TextBlock Text="{Binding Recommendation}" Margin="8,0,0,0"
-                                                       Style="{StaticResource TextBase}"
-                                                       FontSize="{StaticResource FontSm}" TextWrapping="Wrap"/>
-                                        </StackPanel>
-
-                                        <TextBlock Text="{Binding ExpectedGain}" Style="{StaticResource TextMuted}"
-                                                   Margin="18,4,0,0" TextWrapping="Wrap"
-                                                   Visibility="{Binding ExpectedGain, Converter={StaticResource NullToVis}}"/>
-                                    </StackPanel>
-
-                                    <!-- Находку, которую программа умеет исправить сама,
-                                         нужно уметь исправить прямо отсюда. Иначе отчёт
-                                         остаётся текстом, а не инструментом. -->
-                                    <Button Grid.Column="2" Content="Исправить"
-                                            Style="{StaticResource ButtonSecondary}"
-                                            VerticalAlignment="Top" Margin="16,0,0,0"
-                                            Tag="{Binding FixTweakId}" Click="Fix_Click"
-                                            Visibility="{Binding FixTweakId, Converter={StaticResource NullToVis}}"/>
-                                </Grid>
-                            </Border>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-
-                <Border x:Name="CleanState" Style="{StaticResource Card}" Padding="20,18"
+                <Border x:Name="CleanState" Style="{StaticResource GroupPanel}" Padding="24,20"
                         Visibility="Collapsed">
                     <StackPanel>
-                        <TextBlock Text="Критичных проблем не найдено" Style="{StaticResource TextBase}"
+                        <TextBlock Text="{app:T 'Критичных проблем не найдено'}" Style="{StaticResource TextBase}"
                                    FontWeight="SemiBold" Foreground="{StaticResource Success}"/>
-                        <TextBlock Text="Система настроена аккуратно. Загляни в раздел «Оптимизация» — там есть настройки, которые скан не считает проблемой, но которые всё равно стоит включить."
+                        <TextBlock Text="{app:T 'Проверь «Оптимизацию», если хочешь настроить систему под игры.'}"
                                    Style="{StaticResource TextBody}" Margin="0,6,0,0"/>
                     </StackPanel>
                 </Border>
-
             </StackPanel>
         </ScrollViewer>
     </Grid>

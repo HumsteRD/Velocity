@@ -1,0 +1,214 @@
+<UserControl x:Class="Velocity.App.Views.BenchmarkView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:app="clr-namespace:Velocity.App"
+             Background="Transparent">
+
+    <UserControl.Resources>
+        <app:NullToVisibilityConverter x:Key="NullToVis"/>
+        <app:BoolToVisibilityConverter x:Key="BoolToVis"/>
+
+        <CollectionViewSource x:Key="GroupedRows">
+            <CollectionViewSource.GroupDescriptions>
+                <PropertyGroupDescription PropertyName="Group"/>
+            </CollectionViewSource.GroupDescriptions>
+        </CollectionViewSource>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="28,24,28,16">
+            <StackPanel Margin="0,0,320,0">
+                <TextBlock Text="{app:T 'Замеры до и после'}" Style="{StaticResource TextTitle}"/>
+                <TextBlock Style="{StaticResource TextMuted}" Margin="0,4,0,0" TextWrapping="Wrap"
+                           Text="{app:T 'Отклик системы, процессор, память и сеть. Первый замер становится точкой «до».'}"/>
+            </StackPanel>
+            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                <CheckBox x:Name="IncludeNetwork" Style="{StaticResource ChecklistItem}" IsChecked="True"
+                          Margin="0,0,14,0" VerticalAlignment="Center">
+                    <TextBlock Text="{app:T 'Включая сеть'}" Style="{StaticResource TextBody}" FontSize="{StaticResource FontSm}"/>
+                </CheckBox>
+                <Button x:Name="RunButton" Style="{StaticResource ButtonPrimary}" Content="{app:T 'Запустить замер'}"
+                        MinWidth="160" Click="Run_Click"/>
+            </StackPanel>
+        </Grid>
+
+        <Grid Grid.Row="1" Margin="28,0,20,20">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="260"/>
+                <ColumnDefinition Width="16"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- ─────────── История ─────────── -->
+            <Border Grid.Column="0" Style="{StaticResource GroupPanel}" Padding="6">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <TextBlock Text="{app:T 'История замеров'}" Style="{StaticResource TextLabel}" Margin="12,10,0,8"/>
+                    <ListBox x:Name="RunList" Grid.Row="1" Style="{StaticResource CleanListBox}"
+                             ItemContainerStyle="{StaticResource SelectorItem}"
+                             SelectionChanged="RunList_SelectionChanged">
+                        <ListBox.ItemTemplate>
+                            <DataTemplate>
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel>
+                                        <TextBlock Text="{Binding Title}" Style="{StaticResource TextBase}"
+                                                   FontSize="{StaticResource FontSm}" FontWeight="SemiBold"/>
+                                        <TextBlock Text="{Binding Subtitle}" Style="{StaticResource TextMuted}" Margin="0,2,0,0"
+                                                   TextTrimming="CharacterEllipsis"/>
+                                    </StackPanel>
+                                    <Border Grid.Column="1" Background="{StaticResource AccentDim}" CornerRadius="3"
+                                            Padding="6,2" VerticalAlignment="Center"
+                                            Visibility="{Binding IsBaseline, Converter={StaticResource BoolToVis}}">
+                                        <TextBlock Text="{app:T 'До'}" Style="{StaticResource TextLabel}" Foreground="{StaticResource AccentInk}"/>
+                                    </Border>
+                                </Grid>
+                            </DataTemplate>
+                        </ListBox.ItemTemplate>
+                    </ListBox>
+                    <TextBlock x:Name="EmptyHistory" Grid.Row="1" Style="{StaticResource TextMuted}" Margin="12,0,12,0"
+                               TextWrapping="Wrap" Visibility="Collapsed"
+                               Text="{app:T 'Замеров пока нет. Сделай первый до применения оптимизаций.'}"/>
+                    <StackPanel Grid.Row="2" Margin="6,8,6,6">
+                        <Button x:Name="BaselineButton" Style="{StaticResource ButtonCompact}" Content="{app:T 'Сделать точкой «до»'}"
+                                HorizontalAlignment="Stretch" Click="Baseline_Click" Margin="0,0,0,6"/>
+                        <Button x:Name="DeleteButton" Style="{StaticResource ButtonGhost}" Content="{app:T 'Удалить замер'}"
+                                HorizontalAlignment="Stretch" Click="Delete_Click"/>
+                    </StackPanel>
+                </Grid>
+            </Border>
+
+            <!-- ─────────── Сравнение ─────────── -->
+            <ScrollViewer Grid.Column="2" Style="{StaticResource CleanScrollViewer}" Padding="0,0,8,0">
+                <StackPanel MaxWidth="980" HorizontalAlignment="Left">
+
+                    <!-- Идёт замер -->
+                    <Border x:Name="ProgressPanel" Style="{StaticResource GroupPanel}" Padding="20,16" Margin="0,0,0,12"
+                            Visibility="Collapsed">
+                        <Grid>
+                            <StackPanel>
+                                <TextBlock x:Name="ProgressText" Style="{StaticResource TextBase}" FontWeight="SemiBold"/>
+                                <TextBlock Style="{StaticResource TextMuted}" Margin="0,4,0,0" TextWrapping="Wrap"
+                                           Text="{app:T 'Около 20 секунд. Не трогай мышь и не запускай программы.'}"/>
+                            </StackPanel>
+                            <Button x:Name="CancelButton" Style="{StaticResource ButtonGhost}" Content="{app:T 'Остановить'}"
+                                    HorizontalAlignment="Right" VerticalAlignment="Center" Click="Cancel_Click"/>
+                        </Grid>
+                    </Border>
+
+                    <Border Style="{StaticResource GroupPanel}" Padding="22,18">
+                        <StackPanel>
+                            <TextBlock x:Name="CompareTitle" Style="{StaticResource TextTitle}" FontSize="{StaticResource FontLg}"
+                                       Text="{app:T 'Сравнение'}"/>
+                            <TextBlock x:Name="CompareSubtitle" Style="{StaticResource TextMuted}" Margin="0,4,0,0" TextWrapping="Wrap"/>
+
+                            <!-- Заголовок таблицы -->
+                            <Grid Margin="0,16,0,4">
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="86"/>
+                                    <ColumnDefinition Width="86"/>
+                                    <ColumnDefinition Width="150"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Text="{app:T 'Показатель'}" Style="{StaticResource TextLabel}"/>
+                                <TextBlock Grid.Column="1" Text="{app:T 'До'}" Style="{StaticResource TextLabel}" HorizontalAlignment="Right"/>
+                                <TextBlock Grid.Column="2" Text="{app:T 'После'}" Style="{StaticResource TextLabel}" HorizontalAlignment="Right"/>
+                                <TextBlock Grid.Column="3" Text="{app:T 'Изменение'}" Style="{StaticResource TextLabel}" HorizontalAlignment="Right"/>
+                            </Grid>
+
+                            <ItemsControl x:Name="Rows" ItemsSource="{Binding Source={StaticResource GroupedRows}}">
+                                <ItemsControl.GroupStyle>
+                                    <GroupStyle>
+                                        <GroupStyle.HeaderTemplate>
+                                            <DataTemplate>
+                                                <TextBlock Text="{Binding Name}" Style="{StaticResource TextSection}" Margin="0,14,0,6"/>
+                                            </DataTemplate>
+                                        </GroupStyle.HeaderTemplate>
+                                    </GroupStyle>
+                                </ItemsControl.GroupStyle>
+                                <ItemsControl.ItemTemplate>
+                                    <DataTemplate>
+                                        <Border BorderBrush="{StaticResource BorderSubtle}" BorderThickness="0,1,0,0" Padding="0,8">
+                                            <Grid>
+                                                <Grid.ColumnDefinitions>
+                                                    <ColumnDefinition Width="*"/>
+                                                    <ColumnDefinition Width="86"/>
+                                                    <ColumnDefinition Width="86"/>
+                                                    <ColumnDefinition Width="150"/>
+                                                </Grid.ColumnDefinitions>
+                                                <StackPanel Margin="0,0,12,0">
+                                                    <TextBlock Text="{Binding Title}" Style="{StaticResource TextBase}"
+                                                               FontSize="{StaticResource FontSm}" TextWrapping="Wrap"/>
+                                                    <TextBlock Text="{Binding Hint}" Style="{StaticResource TextMuted}"
+                                                               FontSize="{StaticResource FontXs}" Margin="0,2,0,0" TextWrapping="Wrap"/>
+                                                </StackPanel>
+                                                <TextBlock Grid.Column="1" Text="{Binding BeforeText}" Style="{StaticResource TextValue}"
+                                                           HorizontalAlignment="Right" VerticalAlignment="Top"/>
+                                                <TextBlock Grid.Column="2" Text="{Binding AfterText}" Style="{StaticResource TextValue}"
+                                                           Foreground="{StaticResource TextPrimary}"
+                                                           HorizontalAlignment="Right" VerticalAlignment="Top"/>
+                                                <TextBlock Grid.Column="3" Text="{Binding DeltaText}" Style="{StaticResource TextValue}"
+                                                           Foreground="{Binding DeltaBrush}" FontWeight="SemiBold"
+                                                           HorizontalAlignment="Right" VerticalAlignment="Top" TextAlignment="Right"
+                                                           TextWrapping="Wrap"/>
+                                            </Grid>
+                                        </Border>
+                                    </DataTemplate>
+                                </ItemsControl.ItemTemplate>
+                            </ItemsControl>
+
+                            <TextBlock x:Name="ContextText" Style="{StaticResource TextMuted}" Margin="0,14,0,0" TextWrapping="Wrap"/>
+                            <TextBlock x:Name="ErrorsText" Style="{StaticResource TextMuted}" Foreground="{StaticResource Warning}"
+                                       Margin="0,6,0,0" TextWrapping="Wrap" Visibility="Collapsed"/>
+                        </StackPanel>
+                    </Border>
+
+                    <!-- Частота опроса мыши: меряется по кнопке, нужно двигать мышью -->
+                    <Border Style="{StaticResource GroupPanel}" Padding="22,16" Margin="0,12,0,0">
+                        <StackPanel>
+                            <Grid>
+                                <StackPanel Margin="0,0,200,0">
+                                    <TextBlock Text="{app:T 'Частота опроса мыши'}" Style="{StaticResource TextLabel}"/>
+                                    <TextBlock Style="{StaticResource TextBody}" FontSize="{StaticResource FontSm}" Margin="0,6,0,0"
+                                               TextWrapping="Wrap"
+                                               Text="{app:T 'Фактическая частота, с которой мышь сообщает о движении.'}"/>
+                                </StackPanel>
+                                <Button x:Name="MouseButton" Content="{app:T 'Замерить мышь'}" Style="{StaticResource ButtonSecondary}"
+                                        HorizontalAlignment="Right" VerticalAlignment="Center" Click="Mouse_Click"/>
+                            </Grid>
+                            <TextBlock x:Name="MouseResult" Style="{StaticResource TextBase}" FontWeight="SemiBold"
+                                       Margin="0,12,0,0" Visibility="Collapsed"/>
+                            <TextBlock x:Name="MouseVerdict" Style="{StaticResource TextBody}" FontSize="{StaticResource FontSm}"
+                                       Margin="0,4,0,0" TextWrapping="Wrap" Visibility="Collapsed"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource GroupPanel}" Padding="22,16" Margin="0,12,0,0">
+                        <StackPanel>
+                            <TextBlock Text="{app:T 'Как мерить честно'}" Style="{StaticResource TextLabel}"/>
+                            <TextBlock Style="{StaticResource TextBody}" FontSize="{StaticResource FontSm}" Margin="0,8,0,0"
+                                       TextWrapping="Wrap" LineHeight="19"
+                                       Text="{app:T 'Закрой лишние программы, подожди пару минут после загрузки Windows и сделай два замера подряд: разница между ними — погрешность.'}"/>
+                            <TextBlock Style="{StaticResource TextMuted}" Margin="0,10,0,0" TextWrapping="Wrap"
+                                       Text="{app:T 'FPS и 1% low эти замеры не заменяют.'}"/>
+                            <Button Content="{app:T 'Открыть руководство'}" Style="{StaticResource ButtonLink}" Margin="0,8,0,0"
+                                    Click="OpenGuide_Click"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </ScrollViewer>
+        </Grid>
+    </Grid>
+</UserControl>

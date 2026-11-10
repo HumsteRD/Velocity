@@ -2,140 +2,76 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:app="clr-namespace:Velocity.App"
-             Background="{StaticResource BgBase}">
-
+             Background="Transparent">
     <UserControl.Resources>
         <app:NullToVisibilityConverter x:Key="NullToVis"/>
         <app:CountToVisibilityConverter x:Key="CountToVis"/>
+        <Style x:Key="GameSelector" TargetType="ListBoxItem">
+            <Setter Property="Padding" Value="0"/><Setter Property="Margin" Value="0,0,0,3"/>
+            <Setter Property="Background" Value="Transparent"/><Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="ListBoxItem">
+                <Border x:Name="ItemBorder" Background="Transparent" CornerRadius="{StaticResource RadiusSm}" BorderBrush="Transparent" BorderThickness="1" Padding="13,11"><ContentPresenter/></Border>
+                <ControlTemplate.Triggers>
+                    <Trigger Property="IsMouseOver" Value="True"><Setter TargetName="ItemBorder" Property="Background" Value="{StaticResource BgHover}"/></Trigger>
+                    <Trigger Property="IsSelected" Value="True"><Setter TargetName="ItemBorder" Property="Background" Value="{StaticResource AccentDim}"/><Setter TargetName="ItemBorder" Property="BorderBrush" Value="{StaticResource BorderStrong}"/></Trigger>
+                </ControlTemplate.Triggers>
+            </ControlTemplate></Setter.Value></Setter>
+        </Style>
+        <Style x:Key="ChecklistBox" TargetType="CheckBox">
+            <Setter Property="Margin" Value="0,0,0,10"/><Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template"><Setter.Value><ControlTemplate TargetType="CheckBox">
+                <Grid><Grid.ColumnDefinitions><ColumnDefinition Width="24"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                    <Border x:Name="Check" Width="16" Height="16" Margin="0,3,8,0" CornerRadius="3" BorderThickness="1" Background="{StaticResource BgInset}" BorderBrush="{StaticResource BorderStrong}">
+                        <TextBlock x:Name="Mark" Text="&#xE73E;" FontFamily="Segoe Fluent Icons, Segoe MDL2 Assets" FontSize="9" HorizontalAlignment="Center" VerticalAlignment="Center" Foreground="{StaticResource AccentText}" Visibility="Collapsed"/>
+                    </Border><ContentPresenter Grid.Column="1"/>
+                </Grid>
+                <ControlTemplate.Triggers><Trigger Property="IsChecked" Value="True"><Setter TargetName="Check" Property="Background" Value="{StaticResource Accent}"/><Setter TargetName="Check" Property="BorderBrush" Value="{StaticResource Accent}"/><Setter TargetName="Mark" Property="Visibility" Value="Visible"/></Trigger></ControlTemplate.Triggers>
+            </ControlTemplate></Setter.Value></Setter>
+        </Style>
     </UserControl.Resources>
-
     <Grid>
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto"/>
-            <RowDefinition Height="*"/>
-        </Grid.RowDefinitions>
-
-        <StackPanel Grid.Row="0" Margin="28,24,28,16">
-            <TextBlock Text="Профили игр" Style="{StaticResource TextTitle}"/>
-            <TextBlock x:Name="SubtitleText" Style="{StaticResource TextMuted}" Margin="0,4,0,0"/>
-            <TextBlock Style="{StaticResource TextBody}" Margin="0,12,0,0" FontSize="{StaticResource FontSm}"
-                       Text="Движковые настройки дают больше кадров, чем любые системные твики. Здесь собрано то, что относится к конкретной игре: параметры запуска, правки конфигов и настройки, которые надо выставить в самой игре."/>
-        </StackPanel>
-
-        <ScrollViewer Grid.Row="1" Style="{StaticResource CleanScrollViewer}" Padding="28,0,20,24">
-            <StackPanel>
-                <ItemsControl x:Name="GameList">
-                    <ItemsControl.ItemTemplate>
-                        <DataTemplate>
-                            <Border Style="{StaticResource Card}" Margin="0,0,0,10" Padding="20,17">
-                                <StackPanel>
-
-                                    <!-- Заголовок игры -->
-                                    <Grid>
-                                        <StackPanel>
-                                            <TextBlock Text="{Binding Name}" Style="{StaticResource TextBase}"
-                                                       FontSize="{StaticResource FontLg}" FontWeight="SemiBold"/>
-                                            <TextBlock Text="{Binding Location}" Style="{StaticResource TextMuted}"
-                                                       Margin="0,3,0,0"/>
-                                        </StackPanel>
-                                        <Button Content="Применить профиль" Style="{StaticResource ButtonSecondary}"
-                                                HorizontalAlignment="Right" VerticalAlignment="Top"
-                                                Tag="{Binding Id}" Click="ApplyProfile_Click"/>
-                                    </Grid>
-
-                                    <!-- Параметры запуска -->
-                                    <StackPanel Margin="0,16,0,0"
-                                                Visibility="{Binding LaunchOptions, Converter={StaticResource NullToVis}}">
-                                        <TextBlock Text="ПАРАМЕТРЫ ЗАПУСКА" Style="{StaticResource TextLabel}"/>
-                                        <Border Background="{StaticResource BgInset}" CornerRadius="{StaticResource RadiusSm}"
-                                                BorderBrush="{StaticResource BorderSubtle}" BorderThickness="1"
-                                                Padding="10,7" Margin="0,6,0,0">
-                                            <Grid>
-                                                <TextBlock Text="{Binding LaunchOptions}" Style="{StaticResource TextValue}"
-                                                           Foreground="{StaticResource Accent}" TextWrapping="Wrap"
-                                                           Margin="0,0,70,0"/>
-                                                <Button Content="Копировать" Style="{StaticResource ButtonGhost}"
-                                                        FontSize="{StaticResource FontXs}"
-                                                        HorizontalAlignment="Right" VerticalAlignment="Center"
-                                                        Tag="{Binding LaunchOptions}" Click="Copy_Click"/>
-                                            </Grid>
-                                        </Border>
-                                        <TextBlock Text="{Binding LaunchOptionsWhy}" Style="{StaticResource TextMuted}"
-                                                   Margin="0,6,0,0" TextWrapping="Wrap"/>
-                                    </StackPanel>
-
-                                    <!-- Настройки внутри игры -->
-                                    <StackPanel Margin="0,16,0,0"
-                                                Visibility="{Binding Settings.Count, Converter={StaticResource CountToVis}}">
-                                        <TextBlock Text="ВЫСТАВИТЬ В НАСТРОЙКАХ ИГРЫ" Style="{StaticResource TextLabel}"/>
-                                        <ItemsControl ItemsSource="{Binding Settings}" Margin="0,8,0,0">
-                                            <ItemsControl.ItemTemplate>
-                                                <DataTemplate>
-                                                    <Grid Margin="0,0,0,9">
-                                                        <Grid.ColumnDefinitions>
-                                                            <ColumnDefinition Width="Auto"/>
-                                                            <ColumnDefinition Width="*"/>
-                                                        </Grid.ColumnDefinitions>
-
-                                                        <!-- Точка-индикатор важности вместо цветной плашки:
-                                                             не перетягивает внимание с текста. -->
-                                                        <Ellipse Grid.Column="0" Width="5" Height="5"
-                                                                 VerticalAlignment="Top" Margin="0,7,10,0"
-                                                                 Fill="{Binding ImpactBrush}"/>
-
-                                                        <StackPanel Grid.Column="1">
-                                                            <StackPanel Orientation="Horizontal">
-                                                                <TextBlock Text="{Binding Name}"
-                                                                           Style="{StaticResource TextBase}"
-                                                                           FontSize="{StaticResource FontSm}"/>
-                                                                <TextBlock Text="→" Style="{StaticResource TextMuted}"
-                                                                           Margin="7,0"/>
-                                                                <TextBlock Text="{Binding Value}"
-                                                                           Style="{StaticResource TextBase}"
-                                                                           FontSize="{StaticResource FontSm}"
-                                                                           FontWeight="SemiBold"
-                                                                           Foreground="{StaticResource Accent}"/>
-                                                            </StackPanel>
-                                                            <TextBlock Text="{Binding Why}" Style="{StaticResource TextMuted}"
-                                                                       TextWrapping="Wrap" Margin="0,3,0,0"/>
-                                                        </StackPanel>
-                                                    </Grid>
-                                                </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
-                                    </StackPanel>
-
-                                    <!-- Замечания -->
-                                    <StackPanel Margin="0,10,0,0"
-                                                Visibility="{Binding Notes.Count, Converter={StaticResource CountToVis}}">
-                                        <ItemsControl ItemsSource="{Binding Notes}">
-                                            <ItemsControl.ItemTemplate>
-                                                <DataTemplate>
-                                                    <Border Background="{StaticResource InfoDim}" Padding="11,8"
-                                                            CornerRadius="{StaticResource RadiusSm}" Margin="0,0,0,5">
-                                                        <TextBlock Text="{Binding}" Style="{StaticResource TextMuted}"
-                                                                   Foreground="{StaticResource Info}" TextWrapping="Wrap"/>
-                                                    </Border>
-                                                </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
-                                    </StackPanel>
-
-                                </StackPanel>
-                            </Border>
-                        </DataTemplate>
-                    </ItemsControl.ItemTemplate>
-                </ItemsControl>
-
-                <Border x:Name="EmptyState" Style="{StaticResource Card}" Padding="20,18" Visibility="Collapsed">
-                    <StackPanel>
-                        <TextBlock Text="Игр с готовым профилем не найдено" Style="{StaticResource TextBase}"
-                                   FontWeight="SemiBold"/>
-                        <TextBlock Style="{StaticResource TextBody}" Margin="0,6,0,0"
-                                   Text="Программа ищет игры в библиотеках Steam, Epic Games и Xbox. Профили пока есть для части популярных тайтлов — список пополняется."/>
-                    </StackPanel>
-                </Border>
-            </StackPanel>
-        </ScrollViewer>
+        <Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+        <Grid Grid.Row="0" Margin="28,24,28,18">
+            <StackPanel><TextBlock Text="{app:T 'Профили игр'}" Style="{StaticResource TextTitle}"/><TextBlock x:Name="SubtitleText" Style="{StaticResource TextMuted}" Margin="0,4,0,0"/></StackPanel>
+            <Button Content="{app:T 'Обновить'}" Style="{StaticResource ButtonCompact}" HorizontalAlignment="Right" VerticalAlignment="Center" Click="Refresh_Click"/>
+        </Grid>
+        <Grid Grid.Row="1" Margin="28,0,20,24">
+            <Grid.ColumnDefinitions><ColumnDefinition Width="278"/><ColumnDefinition Width="20"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+            <Border Grid.Column="0" Style="{StaticResource GroupPanel}" Padding="8">
+                <Grid><Grid.RowDefinitions><RowDefinition Height="Auto"/><RowDefinition Height="*"/></Grid.RowDefinitions>
+                    <TextBlock Text="{app:T 'Найденные игры'}" Style="{StaticResource TextLabel}" Margin="7,5,7,9"/>
+                    <ListBox x:Name="GameList" Grid.Row="1" Style="{StaticResource CleanListBox}" BorderThickness="0" Background="Transparent" ItemContainerStyle="{StaticResource GameSelector}" SelectionChanged="GameList_SelectionChanged">
+                        <ListBox.ItemTemplate><DataTemplate><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                            <StackPanel><TextBlock Text="{Binding Name}" Style="{StaticResource TextBase}" FontWeight="SemiBold"/><TextBlock Text="{Binding Location}" Style="{StaticResource TextMuted}" Margin="0,3,0,0" TextTrimming="CharacterEllipsis"/></StackPanel>
+                            <Ellipse Grid.Column="1" Width="7" Height="7" VerticalAlignment="Center" Margin="10,0,1,0" Fill="{Binding StateBrush}"/>
+                        </Grid></DataTemplate></ListBox.ItemTemplate>
+                    </ListBox>
+                </Grid>
+            </Border>
+            <ScrollViewer Grid.Column="2" Style="{StaticResource CleanScrollViewer}" Padding="0,0,8,0">
+                <Grid>
+                <StackPanel x:Name="DetailHost" Visibility="Collapsed" MaxWidth="950">
+                    <Border Style="{StaticResource GroupPanel}" Padding="22,19"><Grid><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="Auto"/></Grid.ColumnDefinitions>
+                        <StackPanel><TextBlock x:Name="SelectedGameName" Style="{StaticResource TextTitle}" FontSize="{StaticResource FontXl}"/><TextBlock x:Name="SelectedGameMeta" Style="{StaticResource TextMuted}" Margin="0,5,0,0"/></StackPanel>
+                        <Border Grid.Column="1" Background="{StaticResource BgInset}" BorderBrush="{StaticResource BorderSubtle}" BorderThickness="1" CornerRadius="{StaticResource RadiusSm}" Padding="10,6" VerticalAlignment="Center"><StackPanel Orientation="Horizontal"><Ellipse x:Name="RunIndicator" Width="6" Height="6" VerticalAlignment="Center" Margin="0,0,7,0"/><TextBlock x:Name="RunState" Style="{StaticResource TextMuted}"/></StackPanel></Border>
+                    </Grid></Border>
+                    <Grid Margin="0,12,0,0"><Grid.ColumnDefinitions><ColumnDefinition Width="*"/><ColumnDefinition Width="14"/><ColumnDefinition Width="*"/></Grid.ColumnDefinitions>
+                        <Border Grid.Column="0" Style="{StaticResource GroupPanel}" Padding="19,17"><StackPanel>
+                            <TextBlock Text="{app:T 'Подготовка'}" Style="{StaticResource TextLabel}"/><TextBlock x:Name="ChecklistSummary" Style="{StaticResource TextBody}" Margin="0,7,0,14"/>
+                            <ItemsControl x:Name="Checklist"><ItemsControl.ItemTemplate><DataTemplate><CheckBox Style="{StaticResource ChecklistBox}" IsChecked="{Binding IsComplete, Mode=TwoWay}" Checked="ChecklistChanged" Unchecked="ChecklistChanged"><StackPanel><TextBlock Text="{Binding Name}" Style="{StaticResource TextBase}" FontSize="{StaticResource FontSm}"/><TextBlock Text="{Binding Value}" Style="{StaticResource TextMuted}" Margin="0,2,0,0"/></StackPanel></CheckBox></DataTemplate></ItemsControl.ItemTemplate></ItemsControl>
+                            <TextBlock x:Name="NoChecklist" Text="{app:T 'Для этого профиля нет ручных пунктов.'}" Style="{StaticResource TextMuted}" Visibility="Collapsed"/>
+                        </StackPanel></Border>
+                        <Border Grid.Column="2" Style="{StaticResource GroupPanel}" Padding="19,17"><StackPanel>
+                            <TextBlock Text="{app:T 'Действия профиля'}" Style="{StaticResource TextLabel}"/><TextBlock x:Name="ProfileActionHint" Style="{StaticResource TextBody}" Margin="0,7,0,14"/>
+                            <StackPanel x:Name="LaunchBlock" Visibility="Collapsed"><TextBlock Text="{app:T 'Параметры запуска'}" Style="{StaticResource TextLabel}"/><Border Background="{StaticResource BgInset}" BorderBrush="{StaticResource BorderSubtle}" BorderThickness="1" CornerRadius="{StaticResource RadiusSm}" Padding="10,8" Margin="0,6,0,7"><TextBlock x:Name="LaunchOptionsText" Style="{StaticResource TextValue}" Foreground="{StaticResource AccentInk}" TextWrapping="Wrap"/></Border><Button x:Name="CopyLaunchButton" Content="{app:T 'Копировать параметры'}" Style="{StaticResource ButtonCompact}" HorizontalAlignment="Left" Click="Copy_Click" Margin="0,0,0,14"/></StackPanel>
+                            <Button x:Name="ApplyProfileButton" Content="{app:T 'Применить настройки файла'}" Style="{StaticResource ButtonPrimary}" HorizontalAlignment="Left" Click="ApplyProfile_Click"/><TextBlock x:Name="ProfileActionNote" Style="{StaticResource TextMuted}" Margin="0,8,0,0" TextWrapping="Wrap"/>
+                            <Border x:Name="NotesBlock" Background="{StaticResource InfoDim}" CornerRadius="{StaticResource RadiusSm}" Padding="10,9" Margin="0,16,0,0" Visibility="Collapsed"><StackPanel><TextBlock Text="{app:T 'Важно'}" Style="{StaticResource TextLabel}" Foreground="{StaticResource Info}"/><ItemsControl x:Name="NotesList" Margin="0,5,0,0"><ItemsControl.ItemTemplate><DataTemplate><TextBlock Text="{Binding}" Style="{StaticResource TextMuted}" Foreground="{StaticResource Info}" TextWrapping="Wrap" Margin="0,0,0,5"/></DataTemplate></ItemsControl.ItemTemplate></ItemsControl></StackPanel></Border>
+                        </StackPanel></Border>
+                    </Grid>
+                </StackPanel>
+                    <Border x:Name="EmptyState" Style="{StaticResource GroupPanel}" Padding="22,19" Visibility="Collapsed"><StackPanel><TextBlock Text="{app:T 'Игр с готовым профилем не найдено'}" Style="{StaticResource TextBase}" FontWeight="SemiBold"/><TextBlock Text="{app:T 'После сканирования программа сопоставляет библиотеки Steam, Epic Games и Xbox с профилями.'}" Style="{StaticResource TextBody}" Margin="0,6,0,0"/></StackPanel></Border>
+                </Grid>
+            </ScrollViewer>
+        </Grid>
     </Grid>
 </UserControl>

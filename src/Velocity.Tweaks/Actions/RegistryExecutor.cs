@@ -1,3 +1,4 @@
+using Velocity.Core;
 using System.Globalization;
 using System.Runtime.Versioning;
 using Microsoft.Win32;
@@ -14,7 +15,7 @@ public static class RegistryExecutor
         "HKCU" or "HKEY_CURRENT_USER" => RegistryHive.CurrentUser,
         "HKCR" or "HKEY_CLASSES_ROOT" => RegistryHive.ClassesRoot,
         "HKU" or "HKEY_USERS" => RegistryHive.Users,
-        _ => throw new ArgumentException($"Неизвестный куст реестра: {hive}")
+        _ => throw new ArgumentException(L10n.F("Неизвестный куст реестра: {0}", hive))
     };
 
     /// <summary>Снимает текущее состояние значения. Возвращает null в Value, если его не было.</summary>
@@ -32,6 +33,12 @@ public static class RegistryExecutor
             {
                 raw = key.GetValue(action.Name);
                 if (raw is not null) kind = key.GetValueKind(action.Name).ToString();
+            }
+            else
+            {
+                // Ключа не было вовсе: запоминаем, сколько уровней пути создаст применение,
+                // чтобы откат убрал за собой и пустые ключи, а не только значения.
+                kind = MissingKeyMarker + MissingDepth(baseKey, action.Path);
             }
         }
         catch { /* нет доступа — фиксируем как «значения нет» */ }
@@ -58,7 +65,7 @@ public static class RegistryExecutor
         }
 
         using var key = baseKey.CreateSubKey(action.Path, writable: true)
-            ?? throw new InvalidOperationException($"Не удалось открыть ключ {action.Path}");
+            ?? throw new InvalidOperationException(L10n.F("Не удалось открыть ключ {0}", action.Path));
 
         key.SetValue(action.Name, Convert(action.Value, action.Kind), MapKind(action.Kind));
     }
@@ -78,14 +85,51 @@ public static class RegistryExecutor
         if (record.Value is null)
         {
             // Значения не было — удаляем то, что мы создали.
-            using var existing = baseKey.OpenSubKey(path, writable: true);
-            existing?.DeleteValue(name, throwOnMissingValue: false);
+            using (var existing = baseKey.OpenSubKey(path, writable: true))
+                existing?.DeleteValue(name, throwOnMissingValue: false);
+
+            if (record.ValueKind?.StartsWith(MissingKeyMarker, StringComparison.Ordinal) == true
+                && int.TryParse(record.ValueKind[MissingKeyMarker.Length..], out var depth))
+                DeleteEmptyKeys(baseKey, path, depth);
             return;
         }
 
         using var key = baseKey.CreateSubKey(path, writable: true);
         var kind = Enum.TryParse<RegistryValueKind>(record.ValueKind, out var k) ? k : RegistryValueKind.DWord;
         key?.SetValue(name, Deserialize(record.Value, kind), kind);
+    }
+
+    private const string MissingKeyMarker = "KeyMissing:";
+
+    private static int MissingDepth(RegistryKey baseKey, string path)
+    {
+        var parts = path.Split('\\', StringSplitOptions.RemoveEmptyEntries);
+        for (int existing = parts.Length - 1; existing > 0; existing--)
+        {
+            using var key = baseKey.OpenSubKey(string.Join('\\', parts[..existing]));
+            if (key is not null) return parts.Length - existing;
+        }
+        return parts.Length;
+    }
+
+    /// <summary>Удаляет созданные применением ключи снизу вверх — и только пока они пусты.</summary>
+    private static void DeleteEmptyKeys(RegistryKey baseKey, string path, int depth)
+    {
+        var parts = path.Split('\\', StringSplitOptions.RemoveEmptyEntries);
+        for (int i = 0; i < depth && parts.Length - i > 1; i++)
+        {
+            var current = string.Join('\\', parts[..(parts.Length - i)]);
+            try
+            {
+                using (var key = baseKey.OpenSubKey(current))
+                {
+                    if (key is null) continue;
+                    if (key.ValueCount > 0 || key.SubKeyCount > 0) return;
+                }
+                baseKey.DeleteSubKey(current, throwOnMissingSubKey: false);
+            }
+            catch { return; }
+        }
     }
 
     /// <summary>Совпадает ли текущее значение с ожидаемым (для detect / verify).</summary>

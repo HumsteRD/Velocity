@@ -1,3 +1,4 @@
+using Velocity.Core;
 using System.Runtime.Versioning;
 using System.Text;
 
@@ -22,7 +23,7 @@ public static class ConfigFileEditor
         {
             bool exists = File.Exists(resolvedPath);
             if (!exists && !tweak.CreateIfMissing)
-                return new EditResult(resolvedPath, 0, false, "файл не найден");
+                return new EditResult(resolvedPath, 0, false, L10n.T("файл не найден"));
 
             var directory = Path.GetDirectoryName(resolvedPath);
             if (!string.IsNullOrEmpty(directory)) Directory.CreateDirectory(directory);

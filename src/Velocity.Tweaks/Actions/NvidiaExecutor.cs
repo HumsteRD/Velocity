@@ -1,3 +1,4 @@
+using Velocity.Core;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
 
@@ -107,12 +108,12 @@ public static unsafe class NvidiaExecutor
     public static void Apply(NvidiaProfileAction action)
     {
         if (!IsAvailable)
-            throw new InvalidOperationException("Драйвер NVIDIA не обнаружен");
+            throw new InvalidOperationException(L10n.T("Драйвер NVIDIA не обнаружен"));
 
         if (!uint.TryParse(action.Setting.Replace("0x", ""),
                 System.Globalization.NumberStyles.HexNumber,
                 System.Globalization.CultureInfo.InvariantCulture, out var settingId))
-            throw new ArgumentException($"Идентификатор настройки «{action.Setting}» не распознан");
+            throw new ArgumentException(L10n.F("Идентификатор настройки «{0}» не распознан", action.Setting));
 
         Write(settingId, action.Value);
     }
@@ -136,7 +137,7 @@ public static unsafe class NvidiaExecutor
             return save(session) == 0;
         });
 
-        if (!ok) throw new InvalidOperationException($"NVAPI отклонил настройку 0x{settingId:X8}");
+        if (!ok) throw new InvalidOperationException(L10n.F("NVAPI отклонил настройку 0x{0:X8}", settingId));
     }
 
     /// <summary>

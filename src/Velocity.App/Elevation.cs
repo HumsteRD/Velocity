@@ -27,10 +27,10 @@ public static class Elevation
 
         var answer = MessageBox.Show(
             $"{why}\n\n" +
-            "Эти настройки хранятся в системной части реестра, и изменить их можно только " +
-            "с правами администратора.\n\n" +
-            "Перезапустить программу с повышенными правами? Результаты скана сохранятся.",
-            "Нужны права администратора", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            Loc.T("Эти настройки хранятся в системной части реестра, и изменить их можно только ") +
+            Loc.T("с правами администратора.\n\n") +
+            Loc.T("Перезапустить программу с повышенными правами? Результаты скана сохранятся."),
+            Loc.T("Нужны права администратора"), MessageBoxButton.YesNo, MessageBoxImage.Question);
 
         if (answer != MessageBoxResult.Yes) return false;
 
@@ -61,7 +61,7 @@ public static class Elevation
         }
         catch (Exception ex)
         {
-            MessageBox.Show($"Не удалось перезапустить программу: {ex.Message}", "VELOCITY",
+            MessageBox.Show(Loc.F("Не удалось перезапустить программу: {0}", ex.Message), "VELOCITY",
                 MessageBoxButton.OK, MessageBoxImage.Warning);
             return false;
         }

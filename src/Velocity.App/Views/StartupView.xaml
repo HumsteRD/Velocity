@@ -1,0 +1,127 @@
+<UserControl x:Class="Velocity.App.Views.StartupView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:app="clr-namespace:Velocity.App"
+             Background="Transparent">
+
+    <UserControl.Resources>
+        <app:NullToVisibilityConverter x:Key="NullToVis"/>
+        <app:BoolToVisibilityConverter x:Key="BoolToVis"/>
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="Auto"/>
+        </Grid.RowDefinitions>
+
+        <StackPanel Grid.Row="0" Margin="28,24,28,14">
+            <Grid>
+                <StackPanel Margin="0,0,140,0">
+                    <TextBlock Text="{app:T 'Автозагрузка и фон'}" Style="{StaticResource TextTitle}"/>
+                    <TextBlock x:Name="SubtitleText" Style="{StaticResource TextMuted}" Margin="0,4,0,0" TextWrapping="Wrap"
+                               Text="{app:T 'Программы при входе в Windows, задачи по расписанию и службы сторонних программ.'}"/>
+                </StackPanel>
+                <Button Content="{app:T 'Обновить'}" Style="{StaticResource ButtonCompact}" HorizontalAlignment="Right"
+                        VerticalAlignment="Center" Click="Refresh_Click"/>
+            </Grid>
+            <Border Style="{StaticResource SegmentBar}" Margin="0,14,0,0">
+                <StackPanel Orientation="Horizontal">
+                <RadioButton Style="{StaticResource Segment}" GroupName="Filter" Tag="All" Content="{app:T 'Всё'}"
+                             IsChecked="True" Checked="Filter_Checked"/>
+                <RadioButton x:Name="SuggestChip" Style="{StaticResource Segment}" GroupName="Filter" Tag="Suggest"
+                             Content="{app:T 'Стоит отключить'}" Checked="Filter_Checked"/>
+                <RadioButton Style="{StaticResource Segment}" GroupName="Filter" Tag="Logon"
+                             Content="{app:T 'Программы при входе'}" Checked="Filter_Checked"/>
+                <RadioButton Style="{StaticResource Segment}" GroupName="Filter" Tag="Task"
+                             Content="{app:T 'Задачи'}" Checked="Filter_Checked"/>
+                <RadioButton Style="{StaticResource Segment}" GroupName="Filter" Tag="Service"
+                             Content="{app:T 'Службы'}" Checked="Filter_Checked"/>
+            </StackPanel>
+            </Border>
+            <TextBlock x:Name="ElevationHint" Style="{StaticResource TextMuted}" Margin="0,10,0,0" TextWrapping="Wrap"
+                       Visibility="Collapsed"
+                       Text="{app:T 'Без прав администратора видны не все задачи и службы.'}"/>
+        </StackPanel>
+
+        <ScrollViewer Grid.Row="1" Style="{StaticResource CleanScrollViewer}" Padding="28,0,20,16">
+            <Grid>
+                <ItemsControl x:Name="EntryList">
+                    <ItemsControl.GroupStyle>
+                        <GroupStyle>
+                            <GroupStyle.HeaderTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Name}" Style="{StaticResource TextLabel}" Margin="2,16,0,8"/>
+                                </DataTemplate>
+                            </GroupStyle.HeaderTemplate>
+                        </GroupStyle>
+                    </ItemsControl.GroupStyle>
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border Style="{StaticResource Card}" Margin="0,0,0,6" Padding="18,12">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="*"/>
+                                        <ColumnDefinition Width="Auto"/>
+                                    </Grid.ColumnDefinitions>
+                                    <StackPanel Margin="0,0,16,0">
+                                        <StackPanel Orientation="Horizontal">
+                                            <TextBlock Text="{Binding Name}" Style="{StaticResource TextBase}" FontWeight="SemiBold"
+                                                       TextTrimming="CharacterEllipsis" MaxWidth="520"/>
+                                            <Border Style="{StaticResource Badge}" Background="{Binding BadgeBackground}" Margin="10,0,0,0"
+                                                    Visibility="{Binding BadgeText, Converter={StaticResource NullToVis}}">
+                                                <StackPanel Orientation="Horizontal">
+                                                    <Ellipse Style="{StaticResource BadgeDot}" Fill="{Binding BadgeForeground}"/>
+                                                    <TextBlock Text="{Binding BadgeText}" Style="{StaticResource BadgeText}"
+                                                               Foreground="{Binding BadgeForeground}"/>
+                                                </StackPanel>
+                                            </Border>
+                                            <TextBlock Text="{app:T 'изменено'}" Style="{StaticResource TextMuted}" Foreground="{StaticResource AccentInk}"
+                                                       Margin="10,0,0,0" VerticalAlignment="Center"
+                                                       Visibility="{Binding IsChanged, Converter={StaticResource BoolToVis}}"/>
+                                        </StackPanel>
+                                        <TextBlock Text="{Binding Meta}" Style="{StaticResource TextMuted}" Margin="0,3,0,0"
+                                                   TextTrimming="CharacterEllipsis"/>
+                                        <TextBlock Text="{Binding AdviceText}" Style="{StaticResource TextBody}" FontSize="{StaticResource FontSm}"
+                                                   Margin="0,5,0,0" TextWrapping="Wrap"
+                                                   Visibility="{Binding AdviceText, Converter={StaticResource NullToVis}}"/>
+                                        <TextBlock Text="{Binding Command}" Style="{StaticResource TextValue}" FontSize="{StaticResource FontXs}"
+                                                   Foreground="{StaticResource TextTertiary}" Margin="0,5,0,0"
+                                                   TextTrimming="CharacterEllipsis" ToolTip="{Binding Command}"
+                                                   Visibility="{Binding Command, Converter={StaticResource NullToVis}}"/>
+                                    </StackPanel>
+                                    <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Center">
+                                        <TextBlock Text="{Binding StateText}" Style="{StaticResource TextMuted}" Margin="0,0,10,0"
+                                                   VerticalAlignment="Center"/>
+                                        <CheckBox Style="{StaticResource Switch}" IsChecked="{Binding DesiredEnabled, Mode=TwoWay}"
+                                                  AutomationProperties.Name="{Binding Name}"/>
+                                    </StackPanel>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+                <TextBlock x:Name="EmptyText" Style="{StaticResource TextMuted}" Margin="2,16,0,0" Visibility="Collapsed"
+                           Text="{app:T 'Здесь пусто — под этот фильтр ничего не подходит.'}"/>
+            </Grid>
+        </ScrollViewer>
+
+        <Border Grid.Row="2" Background="{StaticResource BgSurface}"
+                BorderBrush="{StaticResource BorderSubtle}" BorderThickness="0,1,0,0" Padding="28,14">
+            <Grid>
+                <StackPanel VerticalAlignment="Center" Margin="0,0,300,0">
+                    <TextBlock x:Name="ChangesText" Style="{StaticResource TextBase}" FontWeight="SemiBold" Text="{app:T 'Изменений нет'}"/>
+                    <TextBlock Style="{StaticResource TextMuted}" Margin="0,2,0,0" TextWrapping="Wrap"
+                               Text="{app:T 'Ничего не удаляется. Перед изменением создаётся точка отката.'}"/>
+                </StackPanel>
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center">
+                    <Button x:Name="ResetButton" Style="{StaticResource ButtonGhost}" Content="{app:T 'Сбросить'}" Margin="0,0,8,0"
+                            Click="Reset_Click" IsEnabled="False"/>
+                    <Button x:Name="ApplyButton" Style="{StaticResource ButtonPrimary}" Content="{app:T 'Применить'}" MinWidth="130"
+                            Click="Apply_Click" IsEnabled="False"/>
+                </StackPanel>
+            </Grid>
+        </Border>
+    </Grid>
+</UserControl>

@@ -1,0 +1,82 @@
+<UserControl x:Class="Velocity.App.Views.DiagnosisView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:app="clr-namespace:Velocity.App"
+             Background="Transparent">
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <Grid Grid.Row="0" Margin="28,24,28,16">
+            <StackPanel>
+                <TextBlock Text="{app:T 'Разбор ПК'}" Style="{StaticResource TextTitle}"/>
+                <TextBlock Style="{StaticResource TextMuted}" Margin="0,4,0,0" TextWrapping="Wrap" MaxWidth="680" HorizontalAlignment="Left"
+                           Text="{app:T 'Проверка, замер «до», исправление, замер «после» и отчёт. Каждое изменение обратимо.'}"/>
+            </StackPanel>
+            <Button Content="{app:T 'Начать заново'}" Style="{StaticResource ButtonGhost}"
+                    HorizontalAlignment="Right" VerticalAlignment="Top" Click="Restart_Click"/>
+        </Grid>
+
+        <ScrollViewer Grid.Row="1" Style="{StaticResource CleanScrollViewer}" Padding="28,0,20,24">
+            <Grid x:Name="Layout" SizeChanged="Layout_SizeChanged">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition x:Name="GapColumn" Width="16"/>
+                    <ColumnDefinition x:Name="SideColumn" Width="280"/>
+                </Grid.ColumnDefinitions>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <!-- Шаги разбора: строятся в коде по состоянию системы и замеров -->
+                <StackPanel x:Name="StepsPanel" Grid.Column="0"/>
+
+                <!-- Итог справа: оценка, найденное, отчёт -->
+                <StackPanel x:Name="SidePanel" Grid.Column="2">
+                    <Border Style="{StaticResource Card}" Padding="20,18">
+                        <StackPanel>
+                            <TextBlock Text="{app:T 'Готовность системы'}" Style="{StaticResource TextLabel}"/>
+                            <StackPanel Orientation="Horizontal" Margin="0,6,0,0">
+                                <TextBlock x:Name="ScoreText" Text="—" FontFamily="{StaticResource FontDisplay}" FontSize="40"
+                                           FontWeight="Bold" Foreground="{StaticResource TextPrimary}"/>
+                                <TextBlock Text="/100" Style="{StaticResource TextMuted}" VerticalAlignment="Bottom" Margin="4,0,0,9"/>
+                            </StackPanel>
+                            <TextBlock x:Name="ScoreDelta" Style="{StaticResource TextMuted}"/>
+                            <Border Height="1" Background="{StaticResource BorderSubtle}" Margin="0,14"/>
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition/>
+                                    <ColumnDefinition/>
+                                </Grid.ColumnDefinitions>
+                                <StackPanel>
+                                    <TextBlock x:Name="FoundText" Text="—" Style="{StaticResource TextBase}" FontSize="{StaticResource FontXl}" FontWeight="SemiBold"/>
+                                    <TextBlock Text="{app:T 'найдено проблем'}" Style="{StaticResource TextMuted}"/>
+                                </StackPanel>
+                                <StackPanel Grid.Column="1">
+                                    <TextBlock x:Name="FixedText" Text="—" Style="{StaticResource TextBase}" FontSize="{StaticResource FontXl}" FontWeight="SemiBold"
+                                               Foreground="{StaticResource Success}"/>
+                                    <TextBlock Text="{app:T 'устранено'}" Style="{StaticResource TextMuted}"/>
+                                </StackPanel>
+                            </Grid>
+                            <TextBlock x:Name="SessionText" Style="{StaticResource TextMuted}" Margin="0,14,0,0" TextWrapping="Wrap"/>
+                        </StackPanel>
+                    </Border>
+
+                    <Border Style="{StaticResource Card}" Padding="20,18" Margin="0,10,0,0">
+                        <StackPanel>
+                            <TextBlock Text="{app:T 'Отчёт'}" Style="{StaticResource TextLabel}"/>
+                            <TextBlock Style="{StaticResource TextBody}" Margin="0,6,0,12" TextWrapping="Wrap" FontSize="{StaticResource FontSm}"
+                                       Text="{app:T 'Конфигурация, найденные проблемы, что изменено, цифры до и после и что осталось сделать руками. Открывается в браузере, печатается в PDF.'}"/>
+                            <Button x:Name="ReportButton" Content="{app:T 'Создать отчёт'}" Style="{StaticResource ButtonPrimary}"
+                                    HorizontalAlignment="Stretch" Click="Report_Click"/>
+                        </StackPanel>
+                    </Border>
+                </StackPanel>
+            </Grid>
+        </ScrollViewer>
+    </Grid>
+</UserControl>

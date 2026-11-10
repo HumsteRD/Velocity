@@ -5,8 +5,8 @@
     "SteamAppId": "730",
     "Executables": ["cs2.exe"],
     "Engine": "Source2",
-    "LaunchOptions": "-novid -high -nojoy -allow_third_party_software",
-    "LaunchOptionsWhy": "Пропуск заставки, высокий приоритет процесса, отключение опроса геймпадов (он даёт лишние прерывания на частоте опроса мыши).",
+    "LaunchOptions": "-novid -high -nojoy",
+    "LaunchOptionsWhy": "Пропуск заставки, высокий приоритет процесса, отключение опроса геймпадов (он даёт лишние прерывания на частоте опроса мыши). Флаг -allow_third_party_software сюда намеренно не входит: он разрешает сторонним программам внедряться в игру, а Valve предупреждает, что это может снизить Trust Factor.",
     "Config": [
       {
         "File": "{steam_userdata}/730/local/cfg/autoexec.cfg",

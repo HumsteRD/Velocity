@@ -1,0 +1,202 @@
+[
+  {
+    "Id": "latency.priority_separation",
+    "Category": "Cpu",
+    "Title": "Короткие кванты и прибавка активному окну",
+    "Description": "Windows делит процессорное время на кванты и даёт активному окну — игре — прибавку к ним. Параметр Win32PrioritySeparation задаёт длину квантов и размер прибавки. Значение 0x26 означает короткие переменные кванты и максимальную, тройную прибавку окну на переднем плане: поток игры чаще получает процессор после ожидания.\n\nЧестно: клиентская Windows и так работает примерно так (значение по умолчанию 2). Настройка нужна прежде всего там, где другой «оптимизатор» выставил длинные кванты серверного типа, — она возвращает правильный режим и фиксирует его явно.",
+    "Effect": "Win32PrioritySeparation = 0x26 (38)",
+    "ExpectedGain": "На чистой системе — в пределах погрешности. После чужих твиков с длинными квантами — ровнее frametime",
+    "Risk": "Safe",
+    "Confidence": "Community",
+    "RequiresElevation": true,
+    "Presets": [
+      "Competitive",
+      "Maximum",
+      "Extreme"
+    ],
+    "Apply": [
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SYSTEM\\CurrentControlSet\\Control\\PriorityControl",
+        "Name": "Win32PrioritySeparation",
+        "Kind": "dword",
+        "Value": "38"
+      }
+    ]
+  },
+  {
+    "Id": "latency.global_timer_resolution",
+    "Category": "Cpu",
+    "Title": "Глобальное разрешение системного таймера",
+    "Description": "Игры и ограничители кадров просят у Windows точный таймер — 1 мс или 0,5 мс. В Windows 11 такой запрос действует только на тот процесс, который его сделал, и только пока его окно видно. Раньше он ускорял таймер для всей системы.\n\nПараметр GlobalTimerResolutionRequests возвращает прежнее поведение. Это важно, если кадры ограничивает внешняя программа (RTSS), если игра работает в окне, а поверх открыт браузер или чат, и если ты пользуешься утилитами, которые выставляют таймер отдельно от игры. Если ничего из этого — эффекта не будет.",
+    "Effect": "GlobalTimerResolutionRequests = 1 в настройках ядра",
+    "ExpectedGain": "Стабильнее ограничители кадров и программы, выставляющие таймер. FPS сам по себе не растёт",
+    "Risk": "Advanced",
+    "Confidence": "Community",
+    "RequiresReboot": true,
+    "RequiresElevation": true,
+    "Requires": [
+      "os.build>=22000"
+    ],
+    "Presets": [
+      "Competitive",
+      "Maximum",
+      "Extreme"
+    ],
+    "Apply": [
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SYSTEM\\CurrentControlSet\\Control\\Session Manager\\kernel",
+        "Name": "GlobalTimerResolutionRequests",
+        "Kind": "dword",
+        "Value": "1"
+      }
+    ]
+  },
+  {
+    "Id": "latency.dynamic_tick_off",
+    "Category": "Cpu",
+    "Title": "Отключить динамический тик ядра",
+    "Description": "Чтобы экономить энергию, Windows пропускает срабатывания системного таймера, когда процессору нечего делать (dynamic tick). На ноутбуке это продлевает работу от батареи, на настольном ПК добавляет неравномерность: поток, который ждал таймера, просыпается то раньше, то позже. Отключение заставляет таймер тикать ровно.\n\nМеняется конфигурация загрузки (bcdedit). Если на системном диске включён BitLocker, заранее сохрани ключ восстановления: изменение конфигурации загрузки может привести к его запросу при следующем включении.",
+    "Effect": "bcdedit /set disabledynamictick yes",
+    "ExpectedGain": "Ровнее задержка пробуждения потоков — видно в разделе «Замеры». На средний FPS обычно не влияет",
+    "Risk": "Advanced",
+    "Confidence": "Community",
+    "RequiresReboot": true,
+    "RequiresElevation": true,
+    "Requires": [
+      "machine.is_laptop=false"
+    ],
+    "Presets": [
+      "Maximum",
+      "Extreme"
+    ],
+    "Apply": [
+      {
+        "type": "command",
+        "Executable": "bcdedit",
+        "Arguments": "/set disabledynamictick yes"
+      }
+    ],
+    "Revert": [
+      {
+        "type": "command",
+        "Executable": "bcdedit",
+        "Arguments": "/deletevalue disabledynamictick"
+      }
+    ]
+  },
+  {
+    "Id": "latency.msi_gpu",
+    "Category": "Gpu",
+    "Title": "Режим прерываний MSI для видеокарты",
+    "Description": "Устройство сообщает процессору о готовых данных через прерывание. Старый способ — общая линия прерываний, которую видеокарта может делить с другими устройствами. Новый — MSI: сообщение в память без общих линий, с меньшей и более стабильной задержкой обработки.\n\nБольшинство современных драйверов включают MSI сами, и тогда настройка уже отмечена как применённая. Она нужна там, где драйвер объявил поддержку MSI, но оставил её выключенной. Меняются только видеокарты, у которых поддержка объявлена.\n\nЕсли после перезагрузки изображение пропало или появились артефакты — загрузись в безопасном режиме и откати точку в разделе «Точки отката». Переустановка драйвера видеокарты тоже вернёт значение по умолчанию.",
+    "Effect": "MSISupported = 1 для видеокарт с поддержкой MSI",
+    "ExpectedGain": "Ниже и стабильнее задержка прерываний видеокарты (DPC/ISR в LatencyMon). Если MSI уже включён — ничего не изменится",
+    "Risk": "Advanced",
+    "Confidence": "Community",
+    "RequiresReboot": true,
+    "RequiresElevation": true,
+    "Presets": [
+      "Maximum",
+      "Extreme"
+    ],
+    "Apply": [
+      {
+        "type": "registry_each",
+        "Scope": "msi_display",
+        "Name": "MSISupported",
+        "Kind": "dword",
+        "Value": "1"
+      }
+    ]
+  },
+  {
+    "Id": "power.min_cpu_state_100",
+    "Category": "Power",
+    "Title": "Минимальное состояние процессора 100%",
+    "Description": "Схема питания задаёт нижнюю границу частоты процессора. Если она меньше 100%, в простое частота падает, а при резком всплеске нагрузки — входе в перестрелку, взрыве, повороте камеры — процессору нужно время, чтобы разогнаться обратно. При 100% частота не опускается ниже базовой, турбо-буст продолжает работать как обычно.\n\nЦена — немного больше тепла и потребления в простое. На ноутбуке не применяется.",
+    "Effect": "Минимальное состояние процессора = 100% (от сети) в активной схеме питания",
+    "ExpectedGain": "Меньше микрозадержек на всплесках нагрузки. В схеме «Максимальная производительность» уже стоит 100%",
+    "Risk": "Moderate",
+    "Confidence": "Documented",
+    "RequiresElevation": true,
+    "Requires": [
+      "machine.is_laptop=false"
+    ],
+    "Presets": [
+      "Competitive",
+      "Maximum",
+      "Extreme"
+    ],
+    "Apply": [
+      {
+        "type": "powercfg",
+        "Operation": "setvalue",
+        "SubGroupGuid": "54533251-82be-4824-96c1-47b60b740d00",
+        "SettingGuid": "893dee8e-2bef-41e0-89c6-b55d0929964c",
+        "AcValue": 100
+      }
+    ]
+  },
+  {
+    "Id": "power.cpu_idle_off",
+    "Category": "Power",
+    "Title": "Запретить ядрам засыпать (C-States из Windows)",
+    "Description": "Аналог отключения C-States в BIOS, только из Windows и с откатом в один клик. Ядра перестают уходить в сон, поэтому задержка их пробуждения исчезает совсем. Это самый сильный способ стабилизировать отклик системы — и самый дорогой.\n\nПроцессор постоянно работает: диспетчер задач показывает 100% загрузки, растут температура, шум и потребление. На процессорах с турбо-бустом частота под нагрузкой может даже снизиться — нагретому чипу некуда разгоняться.\n\nИмеет смысл на соревновательном ПК с хорошим охлаждением. Перед применением сделай замер в разделе «Замеры», после — повтори и сравни «задержку пробуждения потока». Если разницы нет — откатывай.",
+    "Effect": "Processor idle disable = 1 (от сети) в активной схеме питания",
+    "ExpectedGain": "Минимальная и самая ровная задержка пробуждения. Цена — постоянные 100% загрузки и нагрев",
+    "Risk": "Expert",
+    "Confidence": "Community",
+    "RequiresElevation": true,
+    "Requires": [
+      "machine.is_laptop=false",
+      "cpu.x3d_dual_ccd=false"
+    ],
+    "Presets": [
+      "Extreme"
+    ],
+    "Apply": [
+      {
+        "type": "powercfg",
+        "Operation": "setvalue",
+        "SubGroupGuid": "54533251-82be-4824-96c1-47b60b740d00",
+        "SettingGuid": "5d76a2ca-e8c0-402f-a133-2158492d58ad",
+        "AcValue": 1
+      }
+    ]
+  },
+  {
+    "Id": "power.throttling_off",
+    "Category": "Power",
+    "Title": "Отключить Power Throttling для фоновых программ",
+    "Description": "С Windows 10 1709 система переводит фоновые процессы в режим экономии (EcoQoS): снижает им частоту, а на гибридных процессорах Intel отправляет на энергоэффективные E-ядра. Иногда под это попадает важное для игры — голосовой чат, OBS во время стрима, оверлей. Параметр отключает механизм целиком, так же как одноимённая групповая политика Windows.",
+    "Effect": "PowerThrottlingOff = 1",
+    "ExpectedGain": "Не просаживаются Discord и OBS, пока играешь. Заметнее всего на Intel 12-го поколения и новее",
+    "Risk": "Moderate",
+    "Confidence": "Documented",
+    "RequiresReboot": true,
+    "RequiresElevation": true,
+    "Requires": [
+      "machine.is_laptop=false"
+    ],
+    "Presets": [
+      "Gaming",
+      "Competitive",
+      "Maximum",
+      "Extreme"
+    ],
+    "Apply": [
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SYSTEM\\CurrentControlSet\\Control\\Power\\PowerThrottling",
+        "Name": "PowerThrottlingOff",
+        "Kind": "dword",
+        "Value": "1"
+      }
+    ]
+  }
+]

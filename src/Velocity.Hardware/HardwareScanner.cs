@@ -32,18 +32,18 @@ public sealed partial class HardwareScanner
 
         var steps = new (string Name, string Label, Action Action)[]
         {
-            ("machine",  "плата и BIOS",       () => report.Machine = ScanMachine()),
+            ("machine",  L10n.T("плата и BIOS"),       () => report.Machine = ScanMachine()),
             ("os",       "Windows",            () => report.Os = ScanOs()),
-            ("cpu",      "процессор",           () => report.Cpu = ScanCpu()),
-            ("memory",   "память",             () => report.Memory = ScanMemory()),
-            ("gpu",      "видеокарта",         () => report.Gpus = ScanGpus()),
-            ("display",  "мониторы",           () => report.Displays = ScanDisplays()),
-            ("storage",  "накопители",        () => report.Storage = ScanStorage()),
-            ("network",  "сеть",                () => report.Network = ScanNetwork()),
-            ("input",    "мышь и клавиатура", () => report.Input = ScanInput()),
-            ("tuning",   "настройки Windows",  () => report.Tuning = ScanTuning()),
-            ("startup",  "автозагрузка",        () => report.Startup = ScanStartup()),
-            ("games",    "библиотеки игр",    () => report.Games = GameLibraryScanner.Scan())
+            ("cpu",      L10n.T("процессор"),           () => report.Cpu = ScanCpu()),
+            ("memory",   L10n.T("память"),             () => report.Memory = ScanMemory()),
+            ("gpu",      L10n.T("видеокарта"),         () => report.Gpus = ScanGpus()),
+            ("display",  L10n.T("мониторы"),           () => report.Displays = ScanDisplays()),
+            ("storage",  L10n.T("накопители"),        () => report.Storage = ScanStorage()),
+            ("network",  L10n.T("сеть"),                () => report.Network = ScanNetwork()),
+            ("input",    L10n.T("мышь и клавиатура"), () => report.Input = ScanInput()),
+            ("tuning",   L10n.T("настройки Windows"),  () => report.Tuning = ScanTuning()),
+            ("startup",  L10n.T("автозагрузка"),        () => report.Startup = ScanStartup()),
+            ("games",    L10n.T("библиотеки игр"),    () => report.Games = GameLibraryScanner.Scan())
         };
 
         Parallel.ForEach(steps, step =>

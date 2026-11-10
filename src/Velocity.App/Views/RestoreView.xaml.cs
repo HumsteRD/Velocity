@@ -45,22 +45,22 @@ public partial class RestoreView : UserControl
 
         var active = cards.Count(c => c.CanRevert);
         SubtitleText.Text = cards.Count == 0
-            ? "История изменений пуста"
-            : $"{Plural.With(cards.Count, "точка", "точки", "точек")} · доступно для отката: {active}";
+            ? Loc.T("История изменений пуста")
+            : Loc.F("{0} · доступно для отката: {1}", Loc.Plural(cards.Count, Loc.T("точка"), Loc.T("точки"), Loc.T("точек")), active);
     }
 
     private static string Summarize(Snapshot snapshot)
     {
-        if (snapshot.Changes.Count == 0) return "изменений не записано";
+        if (snapshot.Changes.Count == 0) return Loc.T("изменений не записано");
 
         var titles = snapshot.Changes.Select(c => c.TweakTitle).Take(3).ToList();
         var text = string.Join(", ", titles);
 
         if (snapshot.Changes.Count > titles.Count)
-            text += $" и ещё {snapshot.Changes.Count - titles.Count}";
+            text += Loc.F(" и ещё {0}", snapshot.Changes.Count - titles.Count);
 
         var values = snapshot.Changes.Sum(c => c.Previous.Count);
-        return $"{text}  ·  сохранено значений: {values}";
+        return Loc.F("{0}  ·  сохранено значений: {1}", text, values);
     }
 
     private void Refresh_Click(object sender, RoutedEventArgs e) => Reload();
@@ -73,10 +73,10 @@ public partial class RestoreView : UserControl
         if (snapshot is null) return;
 
         var answer = MessageBox.Show(
-            $"Вернуть систему к состоянию до «{snapshot.Reason}»?\n\n" +
-            $"Будет отменено изменений: {snapshot.Changes.Count}.\n" +
-            "Часть настроек потребует перезагрузки, чтобы откат вступил в силу.",
-            "Подтверждение отката", MessageBoxButton.YesNo, MessageBoxImage.Question);
+            Loc.F("Вернуть систему к состоянию до «{0}»?\n\n", snapshot.Reason) +
+            Loc.F("Будет отменено изменений: {0}.\n", snapshot.Changes.Count) +
+            Loc.T("Часть настроек потребует перезагрузки, чтобы откат вступил в силу."),
+            Loc.T("Подтверждение отката"), MessageBoxButton.YesNo, MessageBoxImage.Question);
 
         if (answer != MessageBoxResult.Yes) return;
 
@@ -87,12 +87,12 @@ public partial class RestoreView : UserControl
         var results = await Task.Run(() => engine.Revert(id));
 
         var failed = results.Where(r => r.Outcome == ApplyOutcome.Failed).ToList();
-        var text = $"Откачено: {results.Count(r => r.Outcome == ApplyOutcome.Applied)}";
+        var text = Loc.F("Откачено: {0}", results.Count(r => r.Outcome == ApplyOutcome.Applied));
         if (failed.Count > 0)
-            text += $"\n\nНе удалось ({failed.Count}):\n" +
+            text += Loc.F("\n\nНе удалось ({0}):\n", failed.Count) +
                     string.Join("\n", failed.Select(f => $"  • {f.Title} — {f.Message}"));
 
-        MessageBox.Show(text, "Откат завершён", MessageBoxButton.OK,
+        MessageBox.Show(text, Loc.T("Откат завершён"), MessageBoxButton.OK,
             failed.Count > 0 ? MessageBoxImage.Warning : MessageBoxImage.Information);
 
         Reload();

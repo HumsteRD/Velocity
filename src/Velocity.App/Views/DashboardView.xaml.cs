@@ -41,7 +41,7 @@ public partial class DashboardView : UserControl
     private void RenderScore(HardwareReport report)
     {
         ScoreValue.Text = report.Score.ToString();
-        ScoreLabel.Text = Scoring.Label(report.Score);
+        ScoreLabel.Text = Loc.T(Scoring.Label(report.Score));
 
         var brush = (Brush)FindResource(report.Score switch
         {
@@ -67,9 +67,10 @@ public partial class DashboardView : UserControl
         var actionable = report.Findings.Count(f => f.Severity != FindingSeverity.Info);
         ProblemCount.Text = actionable.ToString();
         FixableCount.Text = report.Findings.Count(f => f.AutoFixable).ToString();
+        GameCount.Text = report.Games.Count.ToString();
 
         SubtitleText.Text = $"{report.Cpu.Name} · {report.Gpus.FirstOrDefault()?.Name} · " +
-                            $"скан {report.ScanDurationMs} мс";
+                            Loc.F("скан {0} мс", report.ScanDurationMs);
     }
 
     private void UpdateBarWidth(int score)
@@ -87,41 +88,41 @@ public partial class DashboardView : UserControl
             if (!string.IsNullOrWhiteSpace(value)) rows.Add(new SpecRow(label, value));
         }
 
-        Add("Процессор", report.Cpu.Name is { } cpu
+        Add(Loc.T("Процессор"), report.Cpu.Name is { } cpu
             ? $"{cpu}  ·  {report.Cpu.PhysicalCores}C/{report.Cpu.LogicalCores}T" +
               (report.Cpu.IsHybrid ? $"  ·  {report.Cpu.PerformanceCores}P + {report.Cpu.EfficiencyCores}E" : "") +
               (report.Cpu.IsAsymmetricCache ? "  ·  X3D" : "")
             : null);
 
         var gpu = report.Gpus.FirstOrDefault(g => !g.IsIntegrated) ?? report.Gpus.FirstOrDefault();
-        Add("Видеокарта", gpu is not null
-            ? $"{gpu.Name}" + (gpu.VramGb > 0 ? $"  ·  {gpu.VramGb} ГБ" : "") +
-              (gpu.VendorDriverVersion is { } v ? $"  ·  драйвер {v}" : "")
+        Add(Loc.T("Видеокарта"), gpu is not null
+            ? $"{gpu.Name}" + (gpu.VramGb > 0 ? Loc.F("  ·  {0} ГБ", gpu.VramGb) : "") +
+              (gpu.VendorDriverVersion is { } v ? Loc.F("  ·  драйвер {0}", v) : "")
             : null);
 
-        Add("Память", report.Memory.TotalGb > 0
-            ? $"{report.Memory.TotalGb} ГБ {PrettyMemory(report.Memory.Kind)} @ {report.Memory.ConfiguredSpeedMhz} МГц" +
-              (report.Memory.Channels > 0 ? $"  ·  {report.Memory.Channels}-канал" : "")
+        Add(Loc.T("Память"), report.Memory.TotalGb > 0
+            ? Loc.F("{0} ГБ {1} @ {2} МГц", report.Memory.TotalGb, PrettyMemory(report.Memory.Kind), report.Memory.ConfiguredSpeedMhz) +
+              (report.Memory.Channels > 0 ? Loc.F("  ·  {0}-канал", report.Memory.Channels) : "")
             : null);
 
         var system = report.Storage.FirstOrDefault(s => s.IsSystemDrive);
-        Add("Системный диск", system is not null
-            ? $"{system.Model}  ·  {PrettyStorage(system.Kind)}  ·  свободно {system.FreeGb} ГБ из {system.SizeGb}"
+        Add(Loc.T("Системный диск"), system is not null
+            ? Loc.F("{0}  ·  {1}  ·  свободно {2} ГБ из {3}", system.Model, PrettyStorage(system.Kind), system.FreeGb, system.SizeGb)
             : null);
 
         foreach (var d in report.Displays)
         {
-            Add(d.IsPrimary ? "Монитор" : "Монитор 2",
-                $"{d.FriendlyName}  ·  {d.Width}×{d.Height} @ {d.RefreshHz} Гц" +
+            Add(d.IsPrimary ? Loc.T("Монитор") : Loc.T("Монитор 2"),
+                Loc.F("{0}  ·  {1}×{2} @ {3} Гц", d.FriendlyName, d.Width, d.Height, d.RefreshHz) +
                 (d.MaxRefreshAtCurrentResolution > d.RefreshHz + 1
-                    ? $"  ·  доступно {d.MaxRefreshAtCurrentResolution} Гц"
+                    ? Loc.F("  ·  доступно {0} Гц", d.MaxRefreshAtCurrentResolution)
                     : ""));
         }
 
-        Add("Материнская плата", $"{report.Machine.BoardManufacturer} {report.Machine.BoardProduct}".Trim());
-        Add("Windows", $"{report.Os.ProductName} {report.Os.DisplayVersion}  ·  сборка {report.Os.FullBuild}");
-        Add("Схема питания", report.Tuning.PowerPlanName);
-        Add("Игр установлено", report.Games.Count > 0 ? Plural.Games(report.Games.Count) : null);
+        Add(Loc.T("Материнская плата"), $"{report.Machine.BoardManufacturer} {report.Machine.BoardProduct}".Trim());
+        Add("Windows", Loc.F("{0} {1}  ·  сборка {2}", report.Os.ProductName, report.Os.DisplayVersion, report.Os.FullBuild));
+        Add(Loc.T("Схема питания"), report.Tuning.PowerPlanName);
+        Add(Loc.T("Игр установлено"), report.Games.Count > 0 ? Loc.Plural(report.Games.Count, "игра", "игры", "игр") : null);
 
         SpecList.ItemsSource = rows;
     }
@@ -150,16 +151,24 @@ public partial class DashboardView : UserControl
 
     private static string PrettyStorage(StorageKind kind) => kind switch
     {
-        StorageKind.Hdd => "жёсткий диск",
+        StorageKind.Hdd => Loc.T("жёсткий диск"),
         StorageKind.Ssd => "SSD",
         StorageKind.Nvme => "NVMe SSD",
-        _ => "накопитель"
+        _ => Loc.T("накопитель")
     };
 
     /// <summary>
     /// Исправляет находку на месте. Так отчёт становится инструментом:
     /// увидел проблему — нажал — починил, без похода в другой раздел.
     /// </summary>
+    /// <summary>Свечение не должно вылезать за скруглённые углы карточки.</summary>
+    private void Hero_SizeChanged(object sender, SizeChangedEventArgs e)
+    {
+        var radius = (Application.Current.Resources["RadiusLg"] as CornerRadius?)?.TopLeft ?? 12;
+        HeroGrid.Clip = new System.Windows.Media.RectangleGeometry(
+            new Rect(0, 0, e.NewSize.Width, e.NewSize.Height), Math.Max(0, radius - 1), Math.Max(0, radius - 1));
+    }
+
     private async void Fix_Click(object sender, RoutedEventArgs e)
     {
         if (sender is not Button { Tag: string tweakId } button) return;
@@ -170,37 +179,37 @@ public partial class DashboardView : UserControl
         var tweak = state.Catalog.ById(tweakId);
         if (tweak is null)
         {
-            MessageBox.Show("Настройка не найдена в каталоге.", "VELOCITY",
+            MessageBox.Show(Loc.T("Настройка не найдена в каталоге."), "VELOCITY",
                 MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
         if (tweak.RequiresElevation && !Elevation.IsElevated)
         {
-            if (Elevation.RequestRestart($"Настройке «{tweak.Title}» нужны права администратора.")) return;
+            if (Elevation.RequestRestart(Loc.F("Настройке «{0}» нужны права администратора.", tweak.Title))) return;
             return;
         }
 
         button.IsEnabled = false;
-        button.Content = "Применяю…";
+        button.Content = Loc.T("Применяю…");
 
         var session = await Task.Run(() => state.Engine.Apply([tweak],
-            new TweakEngine.ApplyOptions { Reason = $"Исправление: {tweak.Title}" }));
+            new TweakEngine.ApplyOptions { Reason = Loc.F("Исправление: {0}", tweak.Title) }));
 
-        button.Content = "Исправить";
+        button.Content = Loc.T("Исправить");
         button.IsEnabled = true;
 
         if (session.AbortReason is { } abort)
         {
-            MessageBox.Show(abort, "Не применено", MessageBoxButton.OK, MessageBoxImage.Warning);
+            MessageBox.Show(abort, Loc.T("Не применено"), MessageBoxButton.OK, MessageBoxImage.Warning);
             return;
         }
 
         var result = session.Results.FirstOrDefault();
         if (result?.Outcome == ApplyOutcome.Applied)
         {
-            var text = "Готово." + (session.RebootRequired
-                ? " Изменение вступит в силу после перезагрузки."
+            var text = Loc.T("Готово.") + (session.RebootRequired
+                ? Loc.T(" Изменение вступит в силу после перезагрузки.")
                 : "");
             if (Window.GetWindow(this) is MainWindow main) main.SetStatus(text);
 
@@ -209,7 +218,7 @@ public partial class DashboardView : UserControl
         }
         else
         {
-            MessageBox.Show($"Не удалось: {result?.Message ?? "неизвестная причина"}",
+            MessageBox.Show(Loc.F("Не удалось: {0}", result?.Message ?? Loc.T("неизвестная причина")),
                 tweak.Title, MessageBoxButton.OK, MessageBoxImage.Warning);
         }
     }
@@ -217,11 +226,17 @@ public partial class DashboardView : UserControl
     private async void Rescan_Click(object sender, RoutedEventArgs e)
     {
         RescanButton.IsEnabled = false;
-        RescanButton.Content = "Сканирую…";
+        RescanButton.Content = Loc.T("Сканирую…");
 
         await AppState.Current.ScanAsync();
 
-        RescanButton.Content = "Пересканировать";
+        RescanButton.Content = Loc.T("Пересканировать");
         RescanButton.IsEnabled = true;
+    }
+
+    private void OpenSection_Click(object sender, RoutedEventArgs e)
+    {
+        if (sender is not Button { Tag: string key }) return;
+        if (Window.GetWindow(this) is MainWindow main) main.NavigateTo(key);
     }
 }

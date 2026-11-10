@@ -4,6 +4,10 @@
     <OutputType>WinExe</OutputType>
     <TargetFramework>net9.0-windows</TargetFramework>
     <UseWPF>true</UseWPF>
+    <!-- Только ради значка в трее (NotifyIcon): у WPF своего нет. -->
+    <UseWindowsForms>true</UseWindowsForms>
+    <!-- Совет анализатора WinForms про DPI в манифесте касается окон WinForms; у нас окна WPF. -->
+    <NoWarn>$(NoWarn);WFO0003</NoWarn>
     <ImplicitUsings>enable</ImplicitUsings>
     <Nullable>enable</Nullable>
     <AssemblyName>Velocity</AssemblyName>
@@ -13,7 +17,7 @@
 
     <Product>VELOCITY</Product>
     <AssemblyTitle>VELOCITY — оптимизация ПК для игр</AssemblyTitle>
-    <Version>0.3.0</Version>
+    <Version>0.4.0</Version>
     <Company>VELOCITY</Company>
 
     <PublishSingleFile>true</PublishSingleFile>
@@ -24,6 +28,18 @@
     <PublishTrimmed>false</PublishTrimmed>
     <SatelliteResourceLanguages>en</SatelliteResourceLanguages>
   </PropertyGroup>
+
+  <ItemGroup>
+    <!-- Пространства имён WinForms не подключаем глобально: их Application, MessageBox и Button
+         конфликтуют с одноимёнными типами WPF. -->
+    <Using Remove="System.Windows.Forms" />
+    <Using Remove="System.Drawing" />
+  </ItemGroup>
+
+  <ItemGroup>
+    <!-- Переводы интерфейса: Strings/{язык}.json, ключ — русский текст. -->
+    <EmbeddedResource Include="Strings\*.json" WithCulture="false" LogicalName="Velocity.App.Strings.%(Filename)%(Extension)" />
+  </ItemGroup>
 
   <ItemGroup>
     <ProjectReference Include="..\Velocity.Core\Velocity.Core.csproj" />

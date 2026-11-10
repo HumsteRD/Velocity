@@ -9,12 +9,13 @@
         он перестаёт что-либо значить.
     -->
 
-    <!-- Поверхности -->
-    <Color x:Key="BgBaseColor">#0B0C0F</Color>
-    <Color x:Key="BgSurfaceColor">#121419</Color>
-    <Color x:Key="BgElevatedColor">#181B22</Color>
-    <Color x:Key="BgInsetColor">#08090B</Color>
-    <Color x:Key="BgHoverColor">#1C2029</Color>
+    <!-- Нейтральная тёмная основа. Сливовый оттенок остаётся только в глубине,
+         поэтому акцент не растворяется в общем фоне. -->
+    <Color x:Key="BgBaseColor">#121014</Color>
+    <Color x:Key="BgSurfaceColor">#19151C</Color>
+    <Color x:Key="BgElevatedColor">#211A24</Color>
+    <Color x:Key="BgInsetColor">#0D0B0F</Color>
+    <Color x:Key="BgHoverColor">#29212D</Color>
 
     <SolidColorBrush x:Key="BgBase" Color="{StaticResource BgBaseColor}"/>
     <SolidColorBrush x:Key="BgSurface" Color="{StaticResource BgSurfaceColor}"/>
@@ -23,36 +24,65 @@
     <SolidColorBrush x:Key="BgHover" Color="{StaticResource BgHoverColor}"/>
 
     <!-- Границы: волосяные, почти незаметные. Их задача — разделять, а не рисовать рамки. -->
-    <SolidColorBrush x:Key="BorderSubtle" Color="#1E222B"/>
-    <SolidColorBrush x:Key="BorderStrong" Color="#2B313D"/>
-    <SolidColorBrush x:Key="BorderAccent" Color="#1F4E45"/>
+    <SolidColorBrush x:Key="BorderSubtle" Color="#302734"/>
+    <SolidColorBrush x:Key="BorderStrong" Color="#4A3A50"/>
+    <SolidColorBrush x:Key="BorderAccent" Color="#9C4D7D"/>
 
     <!-- Текст -->
-    <SolidColorBrush x:Key="TextPrimary" Color="#E9ECF1"/>
-    <SolidColorBrush x:Key="TextSecondary" Color="#8A93A4"/>
-    <SolidColorBrush x:Key="TextTertiary" Color="#5A6373"/>
-    <SolidColorBrush x:Key="TextDisabled" Color="#3B424E"/>
+    <SolidColorBrush x:Key="TextPrimary" Color="#F4EDF3"/>
+    <SolidColorBrush x:Key="TextSecondary" Color="#C5B2C1"/>
+    <SolidColorBrush x:Key="TextTertiary" Color="#8A7786"/>
+    <SolidColorBrush x:Key="TextDisabled" Color="#594B57"/>
 
     <!-- Акцент -->
-    <Color x:Key="AccentColor">#28E0B0</Color>
+    <Color x:Key="AccentColor">#FF5FA8</Color>
     <SolidColorBrush x:Key="Accent" Color="{StaticResource AccentColor}"/>
-    <SolidColorBrush x:Key="AccentHover" Color="#45F0C4"/>
-    <SolidColorBrush x:Key="AccentDim" Color="#14342E"/>
-    <SolidColorBrush x:Key="AccentText" Color="#04120E"/>
+    <SolidColorBrush x:Key="AccentHover" Color="#FF7BB9"/>
+    <SolidColorBrush x:Key="AccentDim" Color="#4B203B"/>
+    <SolidColorBrush x:Key="AccentText" Color="#280B1D"/>
+    <!-- Акцент как цвет текста: светлее основного, чтобы читался на тёмном фоне (токен violet-text в FI). -->
+    <SolidColorBrush x:Key="AccentInk" Color="#FF9CCB"/>
+    <SolidColorBrush x:Key="AccentPressed" Color="#E64A92"/>
+    <SolidColorBrush x:Key="AccentTint" Color="#29FF5FA8"/>
+    <SolidColorBrush x:Key="AccentLine" Color="#80FF5FA8"/>
+
+    <!-- Полупрозрачная подсветка при наведении — кладётся поверх любой подложки. -->
+    <SolidColorBrush x:Key="NeutralTint" Color="#12FFFFFF"/>
+    <SolidColorBrush x:Key="SegSelected" Color="#4A2C58"/>
+    <!-- Подложка всплывающих списков: всегда непрозрачная, даже в «Аниме». -->
+    <SolidColorBrush x:Key="BgPopup" Color="#2E1D37"/>
+    <SolidColorBrush x:Key="KnobOff" Color="#D9B6CB"/>
+
+    <!-- Свечения и фон окна. Настоящие значения задаёт ThemeManager под тему. -->
+    <SolidColorBrush x:Key="HeroGlow" Color="Transparent"/>
+    <SolidColorBrush x:Key="BackdropTop" Color="Transparent"/>
+    <SolidColorBrush x:Key="BackdropBottom" Color="Transparent"/>
+    <SolidColorBrush x:Key="BackdropGrid" Color="Transparent"/>
+    <DropShadowEffect x:Key="PrimaryShadow" BlurRadius="14" ShadowDepth="0" Opacity="0"/>
+
+    <!-- Главные кнопки: ThemeManager подменяет по стилю и цвету из настроек -->
+    <SolidColorBrush x:Key="PrimaryBg" Color="#7C4FE0"/>
+    <SolidColorBrush x:Key="PrimaryHover" Color="#8A5FEA"/>
+    <SolidColorBrush x:Key="PrimaryPressed" Color="#6A40CC"/>
+    <SolidColorBrush x:Key="PrimaryFg" Color="#FFFFFF"/>
+    <SolidColorBrush x:Key="PrimaryBorder" Color="Transparent"/>
 
     <!-- Семантика -->
-    <SolidColorBrush x:Key="Critical" Color="#F2555F"/>
-    <SolidColorBrush x:Key="CriticalDim" Color="#2D1419"/>
-    <SolidColorBrush x:Key="Warning" Color="#E8A33D"/>
-    <SolidColorBrush x:Key="WarningDim" Color="#2B2113"/>
-    <SolidColorBrush x:Key="Info" Color="#5B9BE8"/>
-    <SolidColorBrush x:Key="InfoDim" Color="#141F2D"/>
-    <SolidColorBrush x:Key="Success" Color="#3FCF8E"/>
+    <SolidColorBrush x:Key="Critical" Color="#FF6978"/>
+    <SolidColorBrush x:Key="CriticalDim" Color="#4B1726"/>
+    <SolidColorBrush x:Key="Warning" Color="#F2AE67"/>
+    <SolidColorBrush x:Key="WarningDim" Color="#4D2C1F"/>
+    <SolidColorBrush x:Key="Info" Color="#C38BFF"/>
+    <SolidColorBrush x:Key="InfoDim" Color="#342047"/>
+    <SolidColorBrush x:Key="Success" Color="#8FDCB3"/>
 
     <!-- Типографика -->
     <FontFamily x:Key="FontUi">Segoe UI Variable Text, Segoe UI, Inter, sans-serif</FontFamily>
     <FontFamily x:Key="FontDisplay">Segoe UI Variable Display, Segoe UI Semibold, Inter, sans-serif</FontFamily>
     <FontFamily x:Key="FontMono">Cascadia Mono, Consolas, JetBrains Mono, monospace</FontFamily>
+
+    <!-- Высота пункта меню: на низком окне главное окно уменьшает её, чтобы меню помещалось целиком -->
+    <sys:Double x:Key="NavItemHeight">34</sys:Double>
 
     <sys:Double x:Key="FontXs">11</sys:Double>
     <sys:Double x:Key="FontSm">12</sys:Double>
@@ -63,9 +93,9 @@
     <sys:Double x:Key="Font3xl">42</sys:Double>
 
     <!-- Радиусы: сдержанные. Скруглять всё подряд — верный способ получить игрушечный вид. -->
-    <CornerRadius x:Key="RadiusSm">3</CornerRadius>
-    <CornerRadius x:Key="RadiusMd">5</CornerRadius>
-    <CornerRadius x:Key="RadiusLg">8</CornerRadius>
+    <CornerRadius x:Key="RadiusSm">5</CornerRadius>
+    <CornerRadius x:Key="RadiusMd">8</CornerRadius>
+    <CornerRadius x:Key="RadiusLg">12</CornerRadius>
 
     <Duration x:Key="DurationFast">0:0:0.12</Duration>
     <Duration x:Key="DurationBase">0:0:0.2</Duration>

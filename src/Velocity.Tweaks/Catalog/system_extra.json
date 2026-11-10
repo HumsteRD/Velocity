@@ -1,0 +1,970 @@
+[
+  {
+    "Id": "win.suggestions_off",
+    "Category": "Windows",
+    "Title": "Отключить рекламу, подсказки и тихую установку приложений",
+    "Description": "Windows сама скачивает и ставит «рекомендованные» приложения и игры, показывает советы в «Пуске», в «Параметрах» и на экране блокировки. Этим занимается служба доставки контента: она периодически ходит в сеть и ставит пакеты в фоне — иногда прямо во время игры.\n\nНастройка выключает все эти источники для текущего пользователя. Уже установленные приложения не удаляются.",
+    "Effect": "Подсказки в «Пуске» и «Параметрах», советы, тихая установка рекомендованных приложений — выключены",
+    "ExpectedGain": "Меньше фоновых загрузок и установок. На FPS напрямую не влияет",
+    "Risk": "Safe",
+    "Confidence": "Documented",
+    "DetectAll": true,
+    "Presets": [
+      "Safe",
+      "Gaming",
+      "Competitive",
+      "Maximum",
+      "Extreme",
+      "Laptop"
+    ],
+    "Apply": [
+      {
+        "type": "registry",
+        "Hive": "HKCU",
+        "Path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+        "Name": "SilentInstalledAppsEnabled",
+        "Kind": "dword",
+        "Value": "0"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKCU",
+        "Path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+        "Name": "SystemPaneSuggestionsEnabled",
+        "Kind": "dword",
+        "Value": "0"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKCU",
+        "Path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+        "Name": "SoftLandingEnabled",
+        "Kind": "dword",
+        "Value": "0"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKCU",
+        "Path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+        "Name": "PreInstalledAppsEnabled",
+        "Kind": "dword",
+        "Value": "0"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKCU",
+        "Path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+        "Name": "OemPreInstalledAppsEnabled",
+        "Kind": "dword",
+        "Value": "0"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKCU",
+        "Path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+        "Name": "SubscribedContent-338388Enabled",
+        "Kind": "dword",
+        "Value": "0"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKCU",
+        "Path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+        "Name": "SubscribedContent-338389Enabled",
+        "Kind": "dword",
+        "Value": "0"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKCU",
+        "Path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+        "Name": "SubscribedContent-338393Enabled",
+        "Kind": "dword",
+        "Value": "0"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKCU",
+        "Path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+        "Name": "SubscribedContent-353694Enabled",
+        "Kind": "dword",
+        "Value": "0"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKCU",
+        "Path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+        "Name": "SubscribedContent-353696Enabled",
+        "Kind": "dword",
+        "Value": "0"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKCU",
+        "Path": "Software\\Microsoft\\Windows\\CurrentVersion\\ContentDeliveryManager",
+        "Name": "SubscribedContent-310093Enabled",
+        "Kind": "dword",
+        "Value": "0"
+      }
+    ]
+  },
+  {
+    "Id": "win.web_search_off",
+    "Category": "Windows",
+    "Title": "Убрать интернет-поиск Bing из меню «Пуск»",
+    "Description": "Каждая буква, набранная в поиске «Пуска», уходит в Bing, а процесс поиска держит в памяти веб-движок. Без веб-подсказок поиск ищет только по компьютеру — быстрее и без лишнего сетевого трафика.",
+    "Effect": "Поиск в «Пуске» ищет только локально",
+    "ExpectedGain": "Быстрее открывается и отвечает поиск, меньше фоновой активности SearchHost",
+    "Risk": "Safe",
+    "Confidence": "Documented",
+    "RequiresReboot": true,
+    "DetectAll": true,
+    "Requires": [
+      "os.build>=19041"
+    ],
+    "RequiresElevation": true,
+    "Presets": [
+      "Safe",
+      "Gaming",
+      "Competitive",
+      "Maximum",
+      "Extreme",
+      "Laptop"
+    ],
+    "Apply": [
+      {
+        "type": "registry",
+        "Hive": "HKCU",
+        "Path": "Software\\Policies\\Microsoft\\Windows\\Explorer",
+        "Name": "DisableSearchBoxSuggestions",
+        "Kind": "dword",
+        "Value": "1"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKCU",
+        "Path": "Software\\Microsoft\\Windows\\CurrentVersion\\Search",
+        "Name": "BingSearchEnabled",
+        "Kind": "dword",
+        "Value": "0"
+      }
+    ]
+  },
+  {
+    "Id": "win.widgets_off",
+    "Category": "Windows",
+    "Title": "Отключить виджеты Windows 11",
+    "Description": "Панель виджетов держит в фоне процесс с веб-движком, который подгружает новости, погоду и рекламу — даже если ты ни разу её не открывал. Групповая политика выключает виджеты целиком вместе с кнопкой на панели задач.",
+    "Effect": "Политика AllowNewsAndInterests = 0",
+    "ExpectedGain": "Минус фоновый процесс Widgets/WebExperience: 100–300 МБ памяти и периодическая сетевая активность",
+    "Risk": "Safe",
+    "Confidence": "Documented",
+    "RequiresReboot": true,
+    "RequiresElevation": true,
+    "Requires": [
+      "os.build>=22000"
+    ],
+    "Presets": [
+      "Safe",
+      "Gaming",
+      "Competitive",
+      "Maximum",
+      "Extreme",
+      "Laptop"
+    ],
+    "Apply": [
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Dsh",
+        "Name": "AllowNewsAndInterests",
+        "Kind": "dword",
+        "Value": "0"
+      }
+    ]
+  },
+  {
+    "Id": "win.feeds_off",
+    "Category": "Windows",
+    "Title": "Отключить «Новости и интересы» на панели задач",
+    "Description": "Виджет новостей и погоды на панели задач Windows 10 держит в фоне веб-движок и периодически подгружает контент. Групповая политика выключает его целиком.",
+    "Effect": "Политика EnableFeeds = 0",
+    "ExpectedGain": "Минус фоновый веб-процесс и его сетевая активность",
+    "Risk": "Safe",
+    "Confidence": "Documented",
+    "RequiresReboot": true,
+    "RequiresElevation": true,
+    "Requires": [
+      "os.build<22000"
+    ],
+    "Presets": [
+      "Safe",
+      "Gaming",
+      "Competitive",
+      "Maximum",
+      "Extreme",
+      "Laptop"
+    ],
+    "Apply": [
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\Windows Feeds",
+        "Name": "EnableFeeds",
+        "Kind": "dword",
+        "Value": "0"
+      }
+    ]
+  },
+  {
+    "Id": "win.copilot_off",
+    "Category": "Windows",
+    "Title": "Отключить Copilot",
+    "Description": "Групповая политика выключает встроенный Copilot Windows 11 и его кнопку. Честно: в сборках 24H2 Copilot стал обычным приложением из Microsoft Store — если он установлен, его проще удалить в «Параметры → Приложения», политика на него может не действовать.",
+    "Effect": "Политика TurnOffWindowsCopilot = 1",
+    "ExpectedGain": "Минус фоновый компонент и кнопка. На FPS не влияет",
+    "Risk": "Safe",
+    "Confidence": "Documented",
+    "RequiresReboot": true,
+    "Requires": [
+      "os.build>=22621"
+    ],
+    "RequiresElevation": true,
+    "Presets": [
+      "Gaming",
+      "Competitive",
+      "Maximum",
+      "Extreme"
+    ],
+    "Apply": [
+      {
+        "type": "registry",
+        "Hive": "HKCU",
+        "Path": "Software\\Policies\\Microsoft\\Windows\\WindowsCopilot",
+        "Name": "TurnOffWindowsCopilot",
+        "Kind": "dword",
+        "Value": "1"
+      }
+    ]
+  },
+  {
+    "Id": "win.edge_background_off",
+    "Category": "Background",
+    "Title": "Запретить Microsoft Edge работать в фоне",
+    "Description": "Даже закрытый Edge по умолчанию держит процессы в памяти («Ускорение запуска» и фоновые расширения), чтобы открываться быстрее. На игровом ПК это пара сотен мегабайт и фоновая активность ради браузера, которым ты, возможно, не пользуешься.\n\nНастройка задаётся политикой Edge, поэтому в его настройках появится строка «Браузером управляет ваша организация» — это нормально и убирается откатом.",
+    "Effect": "Политики Edge: StartupBoostEnabled = 0, BackgroundModeEnabled = 0",
+    "ExpectedGain": "Минус фоновые процессы msedge.exe после закрытия браузера",
+    "Risk": "Moderate",
+    "Confidence": "Documented",
+    "RequiresElevation": true,
+    "DetectAll": true,
+    "Presets": [
+      "Gaming",
+      "Competitive",
+      "Maximum",
+      "Extreme"
+    ],
+    "Apply": [
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Edge",
+        "Name": "StartupBoostEnabled",
+        "Kind": "dword",
+        "Value": "0"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Edge",
+        "Name": "BackgroundModeEnabled",
+        "Kind": "dword",
+        "Value": "0"
+      }
+    ]
+  },
+  {
+    "Id": "win.update_no_drivers",
+    "Category": "Windows",
+    "Title": "Не ставить драйверы через Центр обновления Windows",
+    "Description": "Центр обновления иногда сам заменяет драйвер видеокарты или звука на свою, часто более старую версию — и после очередного обновления игра начинает статтерить, а настройки драйвера слетают. Политика запрещает Windows Update ставить драйверы; обновления безопасности приходят как обычно.\n\nЦена: драйверы придётся обновлять самому — с сайтов NVIDIA, AMD, Intel и производителя платы.",
+    "Effect": "Политика ExcludeWUDriversInQualityUpdate = 1",
+    "ExpectedGain": "Видеодрайвер не подменяется без спроса",
+    "Risk": "Moderate",
+    "Confidence": "Documented",
+    "RequiresElevation": true,
+    "Requires": [
+      "machine.is_laptop=false"
+    ],
+    "Presets": [
+      "Gaming",
+      "Competitive",
+      "Maximum",
+      "Extreme"
+    ],
+    "Apply": [
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate",
+        "Name": "ExcludeWUDriversInQualityUpdate",
+        "Kind": "dword",
+        "Value": "1"
+      }
+    ]
+  },
+  {
+    "Id": "win.update_no_auto_reboot",
+    "Category": "Windows",
+    "Title": "Не перезагружать компьютер, пока ты в системе",
+    "Description": "После установки обновлений Windows может перезагрузить компьютер сама, когда сочтёт, что ты не пользуешься им, — в том числе посреди долгой загрузки игры или ночного скачивания. Политика запрещает автоматическую перезагрузку, пока пользователь вошёл в систему. Windows будет напоминать о перезагрузке, но не сделает её сама.",
+    "Effect": "Политика NoAutoRebootWithLoggedOnUsers = 1",
+    "ExpectedGain": "Никаких внезапных перезагрузок",
+    "Risk": "Safe",
+    "Confidence": "Community",
+    "RequiresElevation": true,
+    "Presets": [
+      "Gaming",
+      "Competitive",
+      "Maximum",
+      "Extreme"
+    ],
+    "Apply": [
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\Windows\\WindowsUpdate\\AU",
+        "Name": "NoAutoRebootWithLoggedOnUsers",
+        "Kind": "dword",
+        "Value": "1"
+      }
+    ]
+  },
+  {
+    "Id": "win.menu_delay",
+    "Category": "Windows",
+    "Title": "Убрать задержку раскрытия меню",
+    "Description": "Windows ждёт 400 мс, прежде чем раскрыть вложенное меню при наведении. Это наследие старых интерфейсов: без задержки меню и подменю открываются сразу.",
+    "Effect": "MenuShowDelay = 0",
+    "ExpectedGain": "Интерфейс Windows отзывчивее. На игры не влияет",
+    "Risk": "Safe",
+    "Confidence": "Documented",
+    "RequiresReboot": true,
+    "Presets": [
+      "Competitive",
+      "Maximum",
+      "Extreme"
+    ],
+    "Apply": [
+      {
+        "type": "registry",
+        "Hive": "HKCU",
+        "Path": "Control Panel\\Desktop",
+        "Name": "MenuShowDelay",
+        "Kind": "string",
+        "Value": "0"
+      }
+    ]
+  },
+  {
+    "Id": "win.startup_delay_off",
+    "Category": "Background",
+    "Title": "Убрать искусственную задержку автозагрузки",
+    "Description": "После входа в систему Windows намеренно придерживает запуск программ из автозагрузки на несколько секунд, чтобы рабочий стол появился быстрее. Если автозагрузка уже почищена (раздел «Автозагрузка и фон»), задержка только мешает: программы запускаются позже без пользы.",
+    "Effect": "StartupDelayInMSec = 0",
+    "ExpectedGain": "Программы из автозагрузки стартуют сразу после входа",
+    "Risk": "Safe",
+    "Confidence": "Community",
+    "Presets": [
+      "Maximum",
+      "Extreme"
+    ],
+    "Apply": [
+      {
+        "type": "registry",
+        "Hive": "HKCU",
+        "Path": "Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Serialize",
+        "Name": "StartupDelayInMSec",
+        "Kind": "dword",
+        "Value": "0"
+      }
+    ]
+  },
+  {
+    "Id": "win.hibernate_off",
+    "Category": "Storage",
+    "Title": "Отключить гибернацию и освободить место",
+    "Description": "Файл гибернации hiberfil.sys занимает на системном диске место, сопоставимое с объёмом оперативной памяти — на ПК с 32 ГБ это 10–25 ГБ. На настольном компьютере, который выключают или отправляют в обычный сон, гибернация не нужна.\n\nВместе с ней выключается «Быстрый запуск» Windows — это само по себе полезно: после выключения система стартует начисто, а не из сохранённого образа ядра.",
+    "Effect": "powercfg /h off — удаляется hiberfil.sys, гибернация и быстрый запуск выключены",
+    "ExpectedGain": "Освобождается 10–25 ГБ на системном диске; запуск всегда «чистый»",
+    "Risk": "Moderate",
+    "Confidence": "Documented",
+    "RequiresElevation": true,
+    "Requires": [
+      "machine.is_laptop=false"
+    ],
+    "Presets": [
+      "Maximum",
+      "Extreme"
+    ],
+    "Detect": {
+      "type": "registry",
+      "Hive": "HKLM",
+      "Path": "SYSTEM\\CurrentControlSet\\Control\\Power",
+      "Name": "HibernateEnabled",
+      "Kind": "dword",
+      "Value": "0"
+    },
+    "Apply": [
+      {
+        "type": "command",
+        "Executable": "powercfg",
+        "Arguments": "/h off"
+      }
+    ],
+    "Revert": [
+      {
+        "type": "command",
+        "Executable": "powercfg",
+        "Arguments": "/h on"
+      }
+    ]
+  },
+  {
+    "Id": "storage.reserved_off",
+    "Category": "Storage",
+    "Title": "Отключить зарезервированное хранилище Windows",
+    "Description": "Windows резервирует на системном диске около 7 ГБ под будущие обновления, чтобы они точно поместились. Если места на диске достаточно, резерв можно вернуть себе. Если места мало и обновление не поместится, Windows попросит освободить место перед установкой.\n\nКоманда не сработает, пока установлены не все обновления, — тогда программа покажет ошибку, а система останется как была.",
+    "Effect": "DISM /Set-ReservedStorageState /State:Disabled",
+    "ExpectedGain": "Около 7 ГБ свободного места на системном диске",
+    "Risk": "Moderate",
+    "Confidence": "Documented",
+    "RequiresElevation": true,
+    "Requires": [
+      "os.build>=18362"
+    ],
+    "Presets": [
+      "Maximum",
+      "Extreme"
+    ],
+    "Apply": [
+      {
+        "type": "command",
+        "Executable": "dism",
+        "Arguments": "/Online /Set-ReservedStorageState /State:Disabled"
+      }
+    ],
+    "Revert": [
+      {
+        "type": "command",
+        "Executable": "dism",
+        "Arguments": "/Online /Set-ReservedStorageState /State:Enabled"
+      }
+    ]
+  },
+  {
+    "Id": "storage.8dot3_off",
+    "Category": "Storage",
+    "Title": "Не создавать короткие имена файлов 8.3",
+    "Description": "Для совместимости с программами времён DOS файловая система NTFS создаёт каждому файлу второе, короткое имя (PROGRA~1). В папках с тысячами файлов — а это как раз игры и кэши шейдеров — это лишняя работа при каждом создании файла. Существующие короткие имена остаются, новые не создаются.\n\nОчень старые установщики иногда опираются на короткие имена. Если такой перестанет работать — откати настройку.",
+    "Effect": "NtfsDisable8dot3NameCreation = 1",
+    "ExpectedGain": "Чуть быстрее создание файлов в больших папках (установка и обновление игр)",
+    "Risk": "Moderate",
+    "Confidence": "Documented",
+    "RequiresElevation": true,
+    "Presets": [
+      "Maximum",
+      "Extreme"
+    ],
+    "Apply": [
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SYSTEM\\CurrentControlSet\\Control\\FileSystem",
+        "Name": "NtfsDisable8dot3NameCreation",
+        "Kind": "dword",
+        "Value": "1"
+      }
+    ]
+  },
+  {
+    "Id": "privacy.error_reporting_off",
+    "Category": "Privacy",
+    "Title": "Отключить отправку отчётов об ошибках",
+    "Description": "После каждого вылета программы Windows собирает отчёт и отправляет его в Microsoft, иногда вместе с дампом памяти. Сбор отчёта после вылета игры — это ещё и лишняя нагрузка на диск в момент, когда ты пытаешься перезапустить игру.\n\nЛокальный журнал событий продолжит работать — разбираться в причинах сбоев это не мешает.",
+    "Effect": "Windows Error Reporting: Disabled = 1, служба WerSvc — отключена",
+    "ExpectedGain": "Быстрее перезапуск после вылета, меньше отправки данных",
+    "Risk": "Moderate",
+    "Confidence": "Documented",
+    "RequiresElevation": true,
+    "DetectAll": true,
+    "Presets": [
+      "Competitive",
+      "Maximum",
+      "Extreme"
+    ],
+    "Apply": [
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Microsoft\\Windows\\Windows Error Reporting",
+        "Name": "Disabled",
+        "Kind": "dword",
+        "Value": "1"
+      },
+      {
+        "type": "service",
+        "Name": "WerSvc",
+        "StartMode": "disabled"
+      }
+    ]
+  },
+  {
+    "Id": "privacy.ceip_off",
+    "Category": "Privacy",
+    "Title": "Отключить программу улучшения качества (CEIP)",
+    "Description": "Программа улучшения качества программного обеспечения собирает сведения об использовании Windows и отправляет их в Microsoft. Групповая политика выключает её целиком.",
+    "Effect": "Политика CEIPEnable = 0",
+    "ExpectedGain": "Меньше фоновой отправки данных. На FPS не влияет",
+    "Risk": "Safe",
+    "Confidence": "Documented",
+    "RequiresElevation": true,
+    "Presets": [
+      "Safe",
+      "Gaming",
+      "Competitive",
+      "Maximum",
+      "Extreme",
+      "Laptop"
+    ],
+    "Apply": [
+      {
+        "type": "registry",
+        "Hive": "HKLM",
+        "Path": "SOFTWARE\\Policies\\Microsoft\\SQMClient\\Windows",
+        "Name": "CEIPEnable",
+        "Kind": "dword",
+        "Value": "0"
+      }
+    ]
+  },
+  {
+    "Id": "privacy.input_collection_off",
+    "Category": "Privacy",
+    "Title": "Не собирать данные рукописного и клавиатурного ввода",
+    "Description": "Windows анализирует то, что ты печатаешь и пишешь пером, чтобы «персонализировать» подсказки, и может отправлять эти данные в Microsoft. Настройка выключает сбор образцов ввода и словаря.",
+    "Effect": "Сбор образцов текста и рукописного ввода, сбор контактов для словаря — выключены",
+    "ExpectedGain": "Приватность ввода. На производительность не влияет",
+    "Risk": "Safe",
+    "Confidence": "Documented",
+    "DetectAll": true,
+    "Presets": [
+      "Safe",
+      "Gaming",
+      "Competitive",
+      "Maximum",
+      "Extreme",
+      "Laptop"
+    ],
+    "Apply": [
+      {
+        "type": "registry",
+        "Hive": "HKCU",
+        "Path": "Software\\Microsoft\\InputPersonalization",
+        "Name": "RestrictImplicitInkCollection",
+        "Kind": "dword",
+        "Value": "1"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKCU",
+        "Path": "Software\\Microsoft\\InputPersonalization",
+        "Name": "RestrictImplicitTextCollection",
+        "Kind": "dword",
+        "Value": "1"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKCU",
+        "Path": "Software\\Microsoft\\InputPersonalization\\TrainedDataStore",
+        "Name": "HarvestContacts",
+        "Kind": "dword",
+        "Value": "0"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKCU",
+        "Path": "Software\\Microsoft\\Personalization\\Settings",
+        "Name": "AcceptedPrivacyPolicy",
+        "Kind": "dword",
+        "Value": "0"
+      }
+    ]
+  },
+  {
+    "Id": "privacy.tailored_off",
+    "Category": "Privacy",
+    "Title": "Отключить персональные рекомендации на основе диагностики",
+    "Description": "Microsoft использует диагностические данные, чтобы показывать «персональные» советы и рекламу своих продуктов. Настройка запрещает это для текущего пользователя.",
+    "Effect": "TailoredExperiencesWithDiagnosticDataEnabled = 0",
+    "ExpectedGain": "Меньше рекламных подсказок. На производительность не влияет",
+    "Risk": "Safe",
+    "Confidence": "Documented",
+    "Presets": [
+      "Safe",
+      "Gaming",
+      "Competitive",
+      "Maximum",
+      "Extreme",
+      "Laptop"
+    ],
+    "Apply": [
+      {
+        "type": "registry",
+        "Hive": "HKCU",
+        "Path": "Software\\Microsoft\\Windows\\CurrentVersion\\Privacy",
+        "Name": "TailoredExperiencesWithDiagnosticDataEnabled",
+        "Kind": "dword",
+        "Value": "0"
+      }
+    ]
+  },
+  {
+    "Id": "privacy.feedback_off",
+    "Category": "Privacy",
+    "Title": "Не спрашивать отзывы о Windows",
+    "Description": "Windows периодически показывает уведомления с просьбой оценить систему. Настройка ставит частоту запросов «никогда» — так же, как переключатель в «Параметры → Конфиденциальность → Диагностика и отзывы».",
+    "Effect": "Частота запросов отзывов — никогда",
+    "ExpectedGain": "Нет всплывающих опросов посреди игры",
+    "Risk": "Safe",
+    "Confidence": "Documented",
+    "Presets": [
+      "Safe",
+      "Gaming",
+      "Competitive",
+      "Maximum",
+      "Extreme",
+      "Laptop"
+    ],
+    "Apply": [
+      {
+        "type": "registry",
+        "Hive": "HKCU",
+        "Path": "Software\\Microsoft\\Siuf\\Rules",
+        "Name": "NumberOfSIUFInPeriod",
+        "Kind": "dword",
+        "Value": "0"
+      }
+    ]
+  },
+  {
+    "Id": "privacy.recall_off",
+    "Category": "Privacy",
+    "Title": "Отключить «Воспоминания» (Recall)",
+    "Description": "Recall на ПК с Copilot+ периодически делает снимки экрана и индексирует их локальной нейросетью. Это постоянная фоновая нагрузка и, мягко говоря, вопрос приватности. Групповая политика запрещает сохранение снимков.",
+    "Effect": "Политика DisableAIDataAnalysis = 1",
+    "ExpectedGain": "Нет фоновых снимков экрана и их обработки",
+    "Risk": "Safe",
+    "Confidence": "Documented",
+    "Requires": [
+      "os.build>=26100"
+    ],
+    "RequiresElevation": true,
+    "Presets": [
+      "Safe",
+      "Gaming",
+      "Competitive",
+      "Maximum",
+      "Extreme",
+      "Laptop"
+    ],
+    "Apply": [
+      {
+        "type": "registry",
+        "Hive": "HKCU",
+        "Path": "Software\\Policies\\Microsoft\\Windows\\WindowsAI",
+        "Name": "DisableAIDataAnalysis",
+        "Kind": "dword",
+        "Value": "1"
+      }
+    ]
+  },
+  {
+    "Id": "bg.unused_services_off",
+    "Category": "Background",
+    "Title": "Отключить неиспользуемые службы Windows",
+    "Description": "Несколько служб, которые на домашнем игровом ПК не делают ничего полезного: демонстрационный режим для витрин магазинов (RetailDemo), служба программы предварительной оценки Windows Insider (wisvc), отслеживание перемещённых ярлыков в корпоративной сети (TrkWks) и сборщик данных для профилировщиков Visual Studio (diagnosticshub).\n\nСлужбы не удаляются: откат вернёт им прежний режим запуска. Тех, которых нет в твоей сборке Windows, программа не касается.",
+    "Effect": "RetailDemo, wisvc, TrkWks, diagnosticshub.standardcollector.service — отключены",
+    "ExpectedGain": "Меньше фоновых служб при загрузке. На FPS не влияет",
+    "Risk": "Safe",
+    "Confidence": "Community",
+    "RequiresReboot": true,
+    "RequiresElevation": true,
+    "DetectAll": true,
+    "Presets": [
+      "Gaming",
+      "Competitive",
+      "Maximum",
+      "Extreme"
+    ],
+    "Apply": [
+      {
+        "type": "service",
+        "Name": "RetailDemo",
+        "StartMode": "disabled"
+      },
+      {
+        "type": "service",
+        "Name": "wisvc",
+        "StartMode": "disabled"
+      },
+      {
+        "type": "service",
+        "Name": "TrkWks",
+        "StartMode": "disabled"
+      },
+      {
+        "type": "service",
+        "Name": "diagnosticshub.standardcollector.service",
+        "StartMode": "disabled"
+      }
+    ]
+  },
+  {
+    "Id": "bg.pcasvc_off",
+    "Category": "Background",
+    "Title": "Отключить помощника по совместимости программ",
+    "Description": "Служба PcaSvc следит за каждой запущенной программой и предлагает «исправить совместимость», если та завершилась странно. На играх она иногда срабатывает ложно и даже применяет режим совместимости без спроса. Отключение убирает и слежку, и эти подсказки.\n\nЕсли пользуешься очень старыми программами, которым нужен режим совместимости, — оставь службу включённой.",
+    "Effect": "Служба PcaSvc → отключена",
+    "ExpectedGain": "Минус фоновый мониторинг каждого запуска программ",
+    "Risk": "Moderate",
+    "Confidence": "Community",
+    "RequiresReboot": true,
+    "RequiresElevation": true,
+    "Presets": [
+      "Maximum",
+      "Extreme"
+    ],
+    "Apply": [
+      {
+        "type": "service",
+        "Name": "PcaSvc",
+        "StartMode": "disabled"
+      }
+    ]
+  },
+  {
+    "Id": "input.usb_power_saving_off",
+    "Category": "Input",
+    "Title": "Запретить Windows усыплять USB-устройства",
+    "Description": "У каждого USB-устройства в диспетчере устройств есть галочка «Разрешить отключение этого устройства для экономии энергии». Включённая, она позволяет Windows усыплять мышь, клавиатуру, гарнитуру и хабы при простое — выход из сна даёт задержку первого движения и иногда «отваливание» устройства.\n\nНастройка снимает эту галочку у всех подключённых USB-устройств, где драйвер её поддерживает. Новые устройства, подключённые позже, получат значение по умолчанию — тогда примени настройку ещё раз.",
+    "Effect": "EnhancedPowerManagementEnabled = 0 и AllowIdleIrpInD3 = 0 для USB-устройств",
+    "ExpectedGain": "Нет задержки «пробуждения» мыши и клавиатуры и случайных отключений",
+    "Risk": "Safe",
+    "Confidence": "Community",
+    "RequiresReboot": true,
+    "RequiresElevation": true,
+    "DetectAll": true,
+    "Requires": [
+      "machine.is_laptop=false"
+    ],
+    "Presets": [
+      "Gaming",
+      "Competitive",
+      "Maximum",
+      "Extreme"
+    ],
+    "Apply": [
+      {
+        "type": "registry_each",
+        "Scope": "usb_devices",
+        "Name": "EnhancedPowerManagementEnabled",
+        "Kind": "dword",
+        "Value": "0",
+        "OnlyIfExists": true
+      },
+      {
+        "type": "registry_each",
+        "Scope": "usb_devices",
+        "Name": "AllowIdleIrpInD3",
+        "Kind": "dword",
+        "Value": "0",
+        "OnlyIfExists": true
+      }
+    ]
+  },
+  {
+    "Id": "input.keyboard_repeat",
+    "Category": "Input",
+    "Title": "Минимальная задержка повтора клавиш",
+    "Description": "Когда клавишу держат, Windows ждёт перед повтором символа и повторяет его с заданной скоростью. Настройка ставит самую короткую задержку и самую высокую скорость повтора — то же, что ползунки в «Панель управления → Клавиатура». На передвижение в играх (WASD) не влияет: игры читают нажатие напрямую, это про набор текста, чат и консоль.",
+    "Effect": "Задержка повтора — минимальная, скорость повтора — максимальная",
+    "ExpectedGain": "Отзывчивее набор и удаление текста. Вступит в силу после повторного входа",
+    "Risk": "Safe",
+    "Confidence": "Documented",
+    "RequiresReboot": true,
+    "DetectAll": true,
+    "Presets": [
+      "Competitive",
+      "Maximum",
+      "Extreme"
+    ],
+    "Apply": [
+      {
+        "type": "registry",
+        "Hive": "HKCU",
+        "Path": "Control Panel\\Keyboard",
+        "Name": "KeyboardDelay",
+        "Kind": "string",
+        "Value": "0"
+      },
+      {
+        "type": "registry",
+        "Hive": "HKCU",
+        "Path": "Control Panel\\Keyboard",
+        "Name": "KeyboardSpeed",
+        "Kind": "string",
+        "Value": "31"
+      }
+    ]
+  },
+  {
+    "Id": "latency.msi_usb_net",
+    "Category": "Cpu",
+    "Title": "Режим прерываний MSI для USB-контроллеров и сетевых карт",
+    "Description": "То же, что MSI для видеокарты, но для контроллеров USB (через них идут мышь и клавиатура) и сетевых карт. Большинство современных драйверов включают MSI сами — тогда настройка уже отмечена как применённая. Меняются только устройства, драйвер которых объявил поддержку MSI.\n\nЕсли после перезагрузки перестала работать мышь, клавиатура или сеть — откати точку в разделе «Точки отката» (мышь можно заменить клавиатурой и наоборот, либо загрузиться в безопасном режиме).",
+    "Effect": "MSISupported = 1 для USB-контроллеров и сетевых карт с поддержкой MSI",
+    "ExpectedGain": "Ниже и стабильнее задержка прерываний USB и сети (LatencyMon). Если MSI уже включён — ничего",
+    "Risk": "Advanced",
+    "Confidence": "Community",
+    "RequiresReboot": true,
+    "RequiresElevation": true,
+    "DetectAll": true,
+    "Presets": [
+      "Maximum",
+      "Extreme"
+    ],
+    "Apply": [
+      {
+        "type": "registry_each",
+        "Scope": "msi_usb",
+        "Name": "MSISupported",
+        "Kind": "dword",
+        "Value": "1"
+      },
+      {
+        "type": "registry_each",
+        "Scope": "msi_net",
+        "Name": "MSISupported",
+        "Kind": "dword",
+        "Value": "1"
+      }
+    ]
+  },
+  {
+    "Id": "net.lso_off",
+    "Category": "Network",
+    "Title": "Отключить Large Send Offload сетевой карты",
+    "Description": "LSO перекладывает нарезку больших TCP-пакетов на сетевую карту. На скорость скачивания это почти не влияет, зато у ряда драйверов Realtek и Intel именно LSO вызывает задержки отправки и рывки пинга под нагрузкой. Отключение — классическое лекарство из руководств производителей для таких случаев.",
+    "Effect": "*LsoV2IPv4 = 0 и *LsoV2IPv6 = 0 у адаптеров, драйвер которых поддерживает параметр",
+    "ExpectedGain": "Ровнее пинг, когда параллельно идёт загрузка. Без проблем с драйвером — без изменений",
+    "Risk": "Moderate",
+    "Confidence": "Community",
+    "RequiresReboot": true,
+    "RequiresElevation": true,
+    "DetectAll": true,
+    "Presets": [
+      "Maximum",
+      "Extreme"
+    ],
+    "Apply": [
+      {
+        "type": "registry_each",
+        "Scope": "net_adapters",
+        "Name": "*LsoV2IPv4",
+        "Kind": "string",
+        "Value": "0",
+        "OnlyIfExists": true
+      },
+      {
+        "type": "registry_each",
+        "Scope": "net_adapters",
+        "Name": "*LsoV2IPv6",
+        "Kind": "string",
+        "Value": "0",
+        "OnlyIfExists": true
+      }
+    ]
+  },
+  {
+    "Id": "net.flow_control_off",
+    "Category": "Network",
+    "Title": "Отключить управление потоком (Flow Control) сетевой карты",
+    "Description": "Flow Control позволяет роутеру или коммутатору попросить сетевую карту «подождать», если он не успевает. В домашней сети это почти никогда не нужно, а пауза задерживает и игровые пакеты.",
+    "Effect": "*FlowControl = 0 у адаптеров, драйвер которых поддерживает параметр",
+    "ExpectedGain": "Меньше редких задержек отправки. В большинстве сетей — без изменений",
+    "Risk": "Moderate",
+    "Confidence": "Community",
+    "RequiresReboot": true,
+    "RequiresElevation": true,
+    "Presets": [
+      "Maximum",
+      "Extreme"
+    ],
+    "Apply": [
+      {
+        "type": "registry_each",
+        "Scope": "net_adapters",
+        "Name": "*FlowControl",
+        "Kind": "string",
+        "Value": "0",
+        "OnlyIfExists": true
+      }
+    ]
+  },
+  {
+    "Id": "net.wake_on_lan_off",
+    "Category": "Network",
+    "Title": "Отключить пробуждение по сети (Wake-on-LAN)",
+    "Description": "Сетевая карта может будить спящий компьютер по специальному пакету или любой сетевой активности. Если ты не включаешь ПК удалённо, это только источник «самопроизвольных» пробуждений ночью.",
+    "Effect": "*WakeOnMagicPacket, *WakeOnPattern и WakeOnLink = 0 у адаптеров, драйвер которых их поддерживает",
+    "ExpectedGain": "Компьютер не просыпается сам. На игры не влияет",
+    "Risk": "Safe",
+    "Confidence": "Documented",
+    "RequiresReboot": true,
+    "RequiresElevation": true,
+    "DetectAll": true,
+    "Presets": [
+      "Gaming",
+      "Competitive",
+      "Maximum",
+      "Extreme"
+    ],
+    "Apply": [
+      {
+        "type": "registry_each",
+        "Scope": "net_adapters",
+        "Name": "*WakeOnMagicPacket",
+        "Kind": "string",
+        "Value": "0",
+        "OnlyIfExists": true
+      },
+      {
+        "type": "registry_each",
+        "Scope": "net_adapters",
+        "Name": "*WakeOnPattern",
+        "Kind": "string",
+        "Value": "0",
+        "OnlyIfExists": true
+      },
+      {
+        "type": "registry_each",
+        "Scope": "net_adapters",
+        "Name": "WakeOnLink",
+        "Kind": "string",
+        "Value": "0",
+        "OnlyIfExists": true
+      }
+    ]
+  }
+]

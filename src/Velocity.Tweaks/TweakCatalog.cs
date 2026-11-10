@@ -1,3 +1,4 @@
+using Velocity.Core;
 using System.Reflection;
 using System.Text.Json;
 using System.Text.Json.Serialization;
@@ -67,7 +68,9 @@ public sealed class TweakCatalog
 
     private void AddRange(string json, string source)
     {
-        var parsed = JsonSerializer.Deserialize<List<TweakDefinition>>(json, JsonOptions);
+        // Тексты для человека переводятся сразу при загрузке: дальше по всей программе
+        // (поиск, диалоги, точки отката) идут уже переведённые названия.
+        var parsed = JsonSerializer.Deserialize<List<TweakDefinition>>(L10n.TranslateJson(json), JsonOptions);
         if (parsed is null) return;
 
         foreach (var tweak in parsed)
@@ -76,7 +79,7 @@ public sealed class TweakCatalog
             // иначе твик молча подменится, и никто этого не заметит.
             if (_tweaks.Any(t => t.Id == tweak.Id))
             {
-                LoadErrors.Add($"{source}: повторяющийся идентификатор «{tweak.Id}»");
+                LoadErrors.Add(L10n.F("{0}: повторяющийся идентификатор «{1}»", source, tweak.Id));
                 continue;
             }
             _tweaks.Add(tweak);

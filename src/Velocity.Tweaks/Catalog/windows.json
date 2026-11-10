@@ -84,7 +84,7 @@
   },
   {
     "Id": "win.background_apps_off",
-    "Category": "Background",
+    "Category": "Privacy",
     "Title": "Запретить фоновую работу приложений Microsoft Store",
     "Description": "Приложения из Store имеют право просыпаться в фоне и тянуть данные. Посреди катки это выглядит как необъяснимый фриз на секунду.",
     "Effect": "Фоновая работа приложений Store отключена",

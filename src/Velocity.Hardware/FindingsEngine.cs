@@ -38,7 +38,7 @@ public static class FindingsEngine
     {
         foreach (var d in r.Displays)
         {
-            var label = d.FriendlyName ?? d.DeviceName ?? "Монитор";
+            var label = d.FriendlyName ?? d.DeviceName ?? L10n.T("Монитор");
 
             // Топ-находка продукта: монитор способен на больше, чем Windows ему выставила.
             if (d.MaxRefreshAtCurrentResolution > d.RefreshHz + 1)
@@ -49,14 +49,14 @@ public static class FindingsEngine
                     Id = "display.refresh_not_max",
                     Category = FindingCategory.Display,
                     Severity = ratio >= 1.5 ? FindingSeverity.Critical : FindingSeverity.Warning,
-                    Title = $"{label}: {d.RefreshHz} Гц вместо {d.MaxRefreshAtCurrentResolution} Гц",
-                    Detail = $"Монитор поддерживает {d.MaxRefreshAtCurrentResolution} Гц на текущем разрешении " +
-                             $"{d.Width}×{d.Height}, но Windows выставила {d.RefreshHz} Гц. " +
-                             $"Ты видишь в {ratio:0.0} раза меньше кадров, чем способен показать экран — " +
-                             "даже если игра выдаёт 200 FPS.",
-                    Recommendation = $"Выставить {d.MaxRefreshAtCurrentResolution} Гц",
+                    Title = L10n.F("{0}: {1} Гц вместо {2} Гц", label, d.RefreshHz, d.MaxRefreshAtCurrentResolution),
+                    Detail = L10n.F("Монитор поддерживает {0} Гц на текущем разрешении ", d.MaxRefreshAtCurrentResolution) +
+                             L10n.F("{0}×{1}, но Windows выставила {2} Гц. ", d.Width, d.Height, d.RefreshHz) +
+                             L10n.F("Ты видишь в {0:0.0} раза меньше кадров, чем способен показать экран — ", ratio) +
+                             L10n.T("даже если игра выдаёт 200 FPS."),
+                    Recommendation = L10n.F("Выставить {0} Гц", d.MaxRefreshAtCurrentResolution),
                     FixTweakId = "display.max_refresh",
-                    ExpectedGain = "Плавность картинки и заметно ниже задержка ввода",
+                    ExpectedGain = L10n.T("Плавность картинки и заметно ниже задержка ввода"),
                     ScoreWeight = 20
                 });
             }
@@ -69,10 +69,10 @@ public static class FindingsEngine
                     Id = "display.higher_hz_other_resolution",
                     Category = FindingCategory.Display,
                     Severity = FindingSeverity.Info,
-                    Title = $"{label}: {d.MaxRefreshAnyResolution} Гц доступны на другом разрешении",
-                    Detail = $"Сейчас {d.Width}×{d.Height} @ {d.RefreshHz} Гц. " +
-                             $"На пониженном разрешении монитор выдаёт до {d.MaxRefreshAnyResolution} Гц. " +
-                             "Это компромисс между чёткостью и плавностью — решение за тобой.",
+                    Title = L10n.F("{0}: {1} Гц доступны на другом разрешении", label, d.MaxRefreshAnyResolution),
+                    Detail = L10n.F("Сейчас {0}×{1} @ {2} Гц. ", d.Width, d.Height, d.RefreshHz) +
+                             L10n.F("На пониженном разрешении монитор выдаёт до {0} Гц. ", d.MaxRefreshAnyResolution) +
+                             L10n.T("Это компромисс между чёткостью и плавностью — решение за тобой."),
                     ScoreWeight = 0
                 });
             }
@@ -84,10 +84,10 @@ public static class FindingsEngine
                     Id = "display.color_depth",
                     Category = FindingCategory.Display,
                     Severity = FindingSeverity.Warning,
-                    Title = $"{label}: глубина цвета {d.BitsPerPixel} бит",
-                    Detail = "Режим ниже 32 бит даёт полосы на градиентах. Обычно это следствие " +
-                             "кривого режима вывода или ограничений кабеля.",
-                    Recommendation = "Выставить 32 бита",
+                    Title = L10n.F("{0}: глубина цвета {1} бит", label, d.BitsPerPixel),
+                    Detail = L10n.T("Режим ниже 32 бит даёт полосы на градиентах. Обычно это следствие ") +
+                             L10n.T("кривого режима вывода или ограничений кабеля."),
+                    Recommendation = L10n.T("Выставить 32 бита"),
                     FixTweakId = "display.color_depth",
                     ScoreWeight = 4
                 });
@@ -103,11 +103,11 @@ public static class FindingsEngine
                 Id = "display.mixed_refresh",
                 Category = FindingCategory.Display,
                 Severity = FindingSeverity.Warning,
-                Title = $"Мониторы работают на разной частоте ({string.Join(" / ", refreshRates.Order())} Гц)",
-                Detail = "Смешанные частоты обновления — известная причина микрофризов в играх: " +
-                         "композитор вынужден синхронизировать разные тайминги. " +
-                         "Особенно заметно, если на втором мониторе идёт видео или стрим.",
-                Recommendation = "Выровнять частоту или отключать второй монитор на время игры",
+                Title = L10n.F("Мониторы работают на разной частоте ({0} Гц)", string.Join(" / ", refreshRates.Order())),
+                Detail = L10n.T("Смешанные частоты обновления — известная причина микрофризов в играх: ") +
+                         L10n.T("композитор вынужден синхронизировать разные тайминги. ") +
+                         L10n.T("Особенно заметно, если на втором мониторе идёт видео или стрим."),
+                Recommendation = L10n.T("Выровнять частоту или отключать второй монитор на время игры"),
                 ScoreWeight = 6
             });
         }
@@ -141,14 +141,14 @@ public static class FindingsEngine
                 Id = "ram.xmp_likely_off",
                 Category = FindingCategory.HardwareBios,
                 Severity = certain ? FindingSeverity.Critical : FindingSeverity.Warning,
-                Title = $"Память работает на {mem.ConfiguredSpeedMhz} МГц — похоже, XMP/EXPO выключен",
-                Detail = $"{mem.Kind} на {mem.ConfiguredSpeedMhz} МГц — это базовая частота JEDEC, " +
-                         "то есть модули работают на «безопасном» минимуме, а не на своей паспортной скорости. " +
-                         "Профиль XMP (Intel) или EXPO (AMD) включается одной галочкой в BIOS и обычно " +
-                         "поднимает частоту в 1.3–1.5 раза. Для игр это одна из самых крупных бесплатных прибавок.",
-                Recommendation = $"Зайти в BIOS ({r.Machine.BoardManufacturer ?? "материнская плата"}) → " +
-                                 "включить профиль XMP / EXPO / DOCP",
-                ExpectedGain = "Обычно +5–15% FPS, на встроенной графике заметно больше",
+                Title = L10n.F("Память работает на {0} МГц — похоже, XMP/EXPO выключен", mem.ConfiguredSpeedMhz),
+                Detail = L10n.F("{0} на {1} МГц — это базовая частота JEDEC, ", mem.Kind, mem.ConfiguredSpeedMhz) +
+                         L10n.T("то есть модули работают на «безопасном» минимуме, а не на своей паспортной скорости. ") +
+                         L10n.T("Профиль XMP (Intel) или EXPO (AMD) включается одной галочкой в BIOS и обычно ") +
+                         L10n.T("поднимает частоту в 1.3–1.5 раза. Для игр это одна из самых крупных бесплатных прибавок."),
+                Recommendation = L10n.F("Зайти в BIOS ({0}) → ", r.Machine.BoardManufacturer ?? L10n.T("материнская плата")) +
+                                 L10n.T("включить профиль XMP / EXPO / DOCP"),
+                ExpectedGain = L10n.T("Обычно +5–15% FPS, на встроенной графике заметно больше"),
                 ScoreWeight = certain ? 20 : 10
             });
         }
@@ -161,12 +161,12 @@ public static class FindingsEngine
                 Id = "ram.single_channel",
                 Category = FindingCategory.HardwareBios,
                 Severity = FindingSeverity.Critical,
-                Title = "Память работает в одноканальном режиме",
-                Detail = $"Установлено модулей: {mem.Modules.Count}, но все они в слотах одного канала " +
+                Title = L10n.T("Память работает в одноканальном режиме"),
+                Detail = L10n.F("Установлено модулей: {0}, но все они в слотах одного канала ", mem.Modules.Count) +
                          $"({string.Join(", ", mem.Modules.Select(m => m.Slot).Where(s => s is not null))}). " +
-                         "Пропускная способность вдвое ниже возможной.",
-                Recommendation = "Переставить планки через слот (обычно A2 и B2 — второй и четвёртый от процессора)",
-                ExpectedGain = "Обычно +5–15% FPS, на встроенной графике до +30%",
+                         L10n.T("Пропускная способность вдвое ниже возможной."),
+                Recommendation = L10n.T("Переставить планки через слот (обычно A2 и B2 — второй и четвёртый от процессора)"),
+                ExpectedGain = L10n.T("Обычно +5–15% FPS, на встроенной графике до +30%"),
                 ScoreWeight = 18
             });
         }
@@ -178,11 +178,11 @@ public static class FindingsEngine
                 Id = "ram.single_module",
                 Category = FindingCategory.HardwareBios,
                 Severity = FindingSeverity.Warning,
-                Title = "Установлен только один модуль памяти",
-                Detail = "Одна планка = одноканальный режим. Вторая планка того же объёма даёт " +
-                         "двухканальный режим и заметный прирост в играх — часто больше, чем апгрейд процессора.",
-                Recommendation = "Добавить второй модуль такого же объёма",
-                ExpectedGain = "Обычно +5–15% FPS",
+                Title = L10n.T("Установлен только один модуль памяти"),
+                Detail = L10n.T("Одна планка = одноканальный режим. Вторая планка того же объёма даёт ") +
+                         L10n.T("двухканальный режим и заметный прирост в играх — часто больше, чем апгрейд процессора."),
+                Recommendation = L10n.T("Добавить второй модуль такого же объёма"),
+                ExpectedGain = L10n.T("Обычно +5–15% FPS"),
                 ScoreWeight = 10
             });
         }
@@ -194,10 +194,10 @@ public static class FindingsEngine
                 Id = "ram.low_capacity",
                 Category = FindingCategory.Memory,
                 Severity = mem.TotalGb < 8 ? FindingSeverity.Critical : FindingSeverity.Warning,
-                Title = $"Всего {mem.TotalGb} ГБ оперативной памяти",
-                Detail = "Современные игры уверенно занимают 8–12 ГБ. При нехватке система начинает " +
-                         "выгружать данные в файл подкачки — это и есть те самые фризы при загрузке локаций.",
-                Recommendation = "Апгрейд до 16 ГБ (в двухканале)",
+                Title = L10n.F("Всего {0} ГБ оперативной памяти", mem.TotalGb),
+                Detail = L10n.T("Современные игры уверенно занимают 8–12 ГБ. При нехватке система начинает ") +
+                         L10n.T("выгружать данные в файл подкачки — это и есть те самые фризы при загрузке локаций."),
+                Recommendation = L10n.T("Апгрейд до 16 ГБ (в двухканале)"),
                 ScoreWeight = mem.TotalGb < 8 ? 12 : 6
             });
         }
@@ -209,10 +209,10 @@ public static class FindingsEngine
                 Id = "ram.pagefile_disabled",
                 Category = FindingCategory.Memory,
                 Severity = FindingSeverity.Warning,
-                Title = "Файл подкачки отключён",
-                Detail = "Популярный «твик» из .bat-паков, который ничего не ускоряет, зато роняет игры " +
-                         "на Unreal Engine 5 и всё, что резервирует много виртуальной памяти.",
-                Recommendation = "Включить файл подкачки на самом быстром SSD",
+                Title = L10n.T("Файл подкачки отключён"),
+                Detail = L10n.T("Популярный «твик» из .bat-паков, который ничего не ускоряет, зато роняет игры ") +
+                         L10n.T("на Unreal Engine 5 и всё, что резервирует много виртуальной памяти."),
+                Recommendation = L10n.T("Включить файл подкачки на самом быстром SSD"),
                 FixTweakId = "ram.pagefile",
                 ScoreWeight = 8
             });
@@ -232,11 +232,11 @@ public static class FindingsEngine
                 Id = "storage.system_on_hdd",
                 Category = FindingCategory.Storage,
                 Severity = FindingSeverity.Critical,
-                Title = "Windows установлена на жёсткий диск",
-                Detail = $"Системный диск — {system.Model} (HDD). Это узкое место всей системы: " +
-                         "долгая загрузка, фризы при подгрузке текстур, медленный отклик. " +
-                         "Переезд на SSD даёт больше ощутимой разницы, чем любая программная оптимизация.",
-                Recommendation = "Перенести систему на SSD",
+                Title = L10n.T("Windows установлена на жёсткий диск"),
+                Detail = L10n.F("Системный диск — {0} (HDD). Это узкое место всей системы: ", system.Model) +
+                         L10n.T("долгая загрузка, фризы при подгрузке текстур, медленный отклик. ") +
+                         L10n.T("Переезд на SSD даёт больше ощутимой разницы, чем любая программная оптимизация."),
+                Recommendation = L10n.T("Перенести систему на SSD"),
                 ScoreWeight = 15
             });
         }
@@ -251,12 +251,12 @@ public static class FindingsEngine
                     Id = "storage.low_free_space",
                     Category = FindingCategory.Storage,
                     Severity = s.FreePercent < 5 ? FindingSeverity.Critical : FindingSeverity.Warning,
-                    Title = $"{s.Model}: свободно {s.FreeGb} ГБ из {s.SizeGb} ГБ ({s.FreePercent:0}%)",
+                    Title = L10n.F("{0}: свободно {1} ГБ из {2} ГБ ({3:0}%)", s.Model, s.FreeGb, s.SizeGb, s.FreePercent),
                     Detail = s.Kind is StorageKind.Ssd or StorageKind.Nvme
-                        ? "У SSD при заполнении выше 90% резко падает скорость записи: " +
-                          "заканчивается SLC-кэш и негде выполнять сборку мусора."
-                        : "Заполненный HDD сильнее фрагментируется и медленнее отдаёт данные.",
-                    Recommendation = "Освободить место (цель — минимум 15% свободного)",
+                        ? L10n.T("У SSD при заполнении выше 90% резко падает скорость записи: ") +
+                          L10n.T("заканчивается SLC-кэш и негде выполнять сборку мусора.")
+                        : L10n.T("Заполненный HDD сильнее фрагментируется и медленнее отдаёт данные."),
+                    Recommendation = L10n.T("Освободить место (цель — минимум 15% свободного)"),
                     ScoreWeight = 8
                 });
             }
@@ -268,10 +268,10 @@ public static class FindingsEngine
                     Id = "storage.games_maybe_on_hdd",
                     Category = FindingCategory.Storage,
                     Severity = FindingSeverity.Info,
-                    Title = $"Есть жёсткий диск: {s.Model} ({string.Join(", ", s.DriveLetters)})",
-                    Detail = "Если игры установлены сюда — время загрузки уровней и подгрузка текстур " +
-                             "будут заметно хуже, чем на SSD. Стоит проверить, где лежат библиотеки Steam/Epic.",
-                    Recommendation = "Перенести активные игры на SSD",
+                    Title = L10n.F("Есть жёсткий диск: {0} ({1})", s.Model, string.Join(", ", s.DriveLetters)),
+                    Detail = L10n.T("Если игры установлены сюда — время загрузки уровней и подгрузка текстур ") +
+                             L10n.T("будут заметно хуже, чем на SSD. Стоит проверить, где лежат библиотеки Steam/Epic."),
+                    Recommendation = L10n.T("Перенести активные игры на SSD"),
                     ScoreWeight = 0
                 });
             }
@@ -283,10 +283,10 @@ public static class FindingsEngine
                     Id = "storage.health",
                     Category = FindingCategory.Storage,
                     Severity = FindingSeverity.Critical,
-                    Title = $"{s.Model}: состояние «{s.HealthStatus}»",
-                    Detail = "Windows сообщает о проблемах с накопителем. Это не про производительность — " +
-                             "это про сохранность данных.",
-                    Recommendation = "Сделать резервную копию и проверить SMART",
+                    Title = L10n.F("{0}: состояние «{1}»", s.Model, s.HealthStatus),
+                    Detail = L10n.T("Windows сообщает о проблемах с накопителем. Это не про производительность — ") +
+                             L10n.T("это про сохранность данных."),
+                    Recommendation = L10n.T("Сделать резервную копию и проверить SMART"),
                     ScoreWeight = 10
                 });
             }
@@ -307,10 +307,10 @@ public static class FindingsEngine
                 Id = "gpu.no_driver",
                 Category = FindingCategory.Gpu,
                 Severity = FindingSeverity.Critical,
-                Title = "Драйвер видеокарты не установлен",
-                Detail = "Система использует «Базовый видеоадаптер (Майкрософт)» — это заглушка без " +
-                         "3D-ускорения. Игры либо не запустятся, либо будут рендериться программно.",
-                Recommendation = "Установить драйвер с сайта производителя видеокарты",
+                Title = L10n.T("Драйвер видеокарты не установлен"),
+                Detail = L10n.T("Система использует «Базовый видеоадаптер (Майкрософт)» — это заглушка без ") +
+                         L10n.T("3D-ускорения. Игры либо не запустятся, либо будут рендериться программно."),
+                Recommendation = L10n.T("Установить драйвер с сайта производителя видеокарты"),
                 ScoreWeight = 25
             });
             return;
@@ -326,11 +326,11 @@ public static class FindingsEngine
                     Id = "gpu.driver_outdated",
                     Category = FindingCategory.Gpu,
                     Severity = age.TotalDays > 730 ? FindingSeverity.Warning : FindingSeverity.Info,
-                    Title = $"Драйвер видеокарты от {date:MM.yyyy} (больше {Plural.Months((int)(age.TotalDays / 30))} назад)",
-                    Detail = $"Установлена версия {gpu.VendorDriverVersion ?? gpu.DriverVersion}. " +
-                             "Свежие драйверы регулярно дают прирост в новых играх и чинят стоттеры — " +
-                             "особенно это касается Intel Arc и новых поколений AMD.",
-                    Recommendation = "Обновить драйвер с сайта производителя",
+                    Title = L10n.F("Драйвер видеокарты от {0:MM.yyyy} (больше {1} назад)", date, Plural.Months((int)(age.TotalDays / 30))),
+                    Detail = L10n.F("Установлена версия {0}. ", gpu.VendorDriverVersion ?? gpu.DriverVersion) +
+                             L10n.T("Свежие драйверы регулярно дают прирост в новых играх и чинят стоттеры — ") +
+                             L10n.T("особенно это касается Intel Arc и новых поколений AMD."),
+                    Recommendation = L10n.T("Обновить драйвер с сайта производителя"),
                     ScoreWeight = 5
                 });
             }
@@ -344,11 +344,11 @@ public static class FindingsEngine
                 Id = "gpu.hybrid_laptop",
                 Category = FindingCategory.Gpu,
                 Severity = FindingSeverity.Info,
-                Title = "Гибридная графика: встроенная + дискретная",
-                Detail = "На ноутбуках игры регулярно запускаются на встроенном видеоядре вместо дискретной карты — " +
-                         "это мгновенная потеря в разы. Стоит проверить, какой GPU реально рендерит игру, " +
-                         "и при возможности включить MUX-переключатель на дискретную.",
-                Recommendation = "Проверить назначение GPU для игр и настройки MUX",
+                Title = L10n.T("Гибридная графика: встроенная + дискретная"),
+                Detail = L10n.T("На ноутбуках игры регулярно запускаются на встроенном видеоядре вместо дискретной карты — ") +
+                         L10n.T("это мгновенная потеря в разы. Стоит проверить, какой GPU реально рендерит игру, ") +
+                         L10n.T("и при возможности включить MUX-переключатель на дискретную."),
+                Recommendation = L10n.T("Проверить назначение GPU для игр и настройки MUX"),
                 ScoreWeight = 0
             });
         }
@@ -360,11 +360,11 @@ public static class FindingsEngine
                 Id = "gpu.low_vram",
                 Category = FindingCategory.Gpu,
                 Severity = FindingSeverity.Info,
-                Title = $"{gpu.VramGb} ГБ видеопамяти",
-                Detail = "Современные игры на высоких текстурах выходят за 6–8 ГБ. При нехватке VRAM " +
-                         "данные начинают ходить через системную память — это резкие просадки 1% low, " +
-                         "а не плавное снижение FPS.",
-                Recommendation = "Снизить качество текстур, включить апскейлер (DLSS/FSR/XeSS)",
+                Title = L10n.F("{0} ГБ видеопамяти", gpu.VramGb),
+                Detail = L10n.T("Современные игры на высоких текстурах выходят за 6–8 ГБ. При нехватке VRAM ") +
+                         L10n.T("данные начинают ходить через системную память — это резкие просадки 1% low, ") +
+                         L10n.T("а не плавное снижение FPS."),
+                Recommendation = L10n.T("Снизить качество текстур, включить апскейлер (DLSS/FSR/XeSS)"),
                 ScoreWeight = 0
             });
         }
@@ -383,12 +383,12 @@ public static class FindingsEngine
                 Id = "win.gamedvr_on",
                 Category = FindingCategory.Windows,
                 Severity = FindingSeverity.Warning,
-                Title = "Фоновая запись Game DVR включена",
-                Detail = "Xbox Game Bar держит наготове буфер записи последних минут игры. " +
-                         "Это стоит кадров даже когда ты ничего не записываешь.",
-                Recommendation = "Отключить фоновую запись",
+                Title = L10n.T("Фоновая запись Game DVR включена"),
+                Detail = L10n.T("Xbox Game Bar держит наготове буфер записи последних минут игры. ") +
+                         L10n.T("Это стоит кадров даже когда ты ничего не записываешь."),
+                Recommendation = L10n.T("Отключить фоновую запись"),
                 FixTweakId = "win.gamedvr_off",
-                ExpectedGain = "Обычно +2–6% FPS и меньше просадок 1% low",
+                ExpectedGain = L10n.T("Обычно +2–6% FPS и меньше просадок 1% low"),
                 ScoreWeight = 8
             });
         }
@@ -400,14 +400,14 @@ public static class FindingsEngine
                 Id = "sec.hvci_on",
                 Category = FindingCategory.Security,
                 Severity = FindingSeverity.Warning,
-                Title = "Включена «Целостность памяти» (Memory Integrity / HVCI)",
-                Detail = "Самый крупный одиночный источник потерь производительности на Windows 11: " +
-                         "виртуализация проверяет драйверы в реальном времени. В играх, упирающихся в процессор, " +
-                         "это обычно 5–15% FPS. Но это реальная защита от подмены драйверов — " +
-                         "отключать стоит осознанно, а не «потому что так в гайде».",
-                Recommendation = "Взвесить: отключение даёт FPS, но снижает защиту системы",
+                Title = L10n.T("Включена «Целостность памяти» (Memory Integrity / HVCI)"),
+                Detail = L10n.T("Самый крупный одиночный источник потерь производительности на Windows 11: ") +
+                         L10n.T("виртуализация проверяет драйверы в реальном времени. В играх, упирающихся в процессор, ") +
+                         L10n.T("это обычно 5–15% FPS. Но это реальная защита от подмены драйверов — ") +
+                         L10n.T("отключать стоит осознанно, а не «потому что так в гайде»."),
+                Recommendation = L10n.T("Взвесить: отключение даёт FPS, но снижает защиту системы"),
                 FixTweakId = "sec.hvci_off",
-                ExpectedGain = "Обычно +5–15% FPS при упоре в CPU",
+                ExpectedGain = L10n.T("Обычно +5–15% FPS при упоре в CPU"),
                 ScoreWeight = 10
             });
         }
@@ -421,14 +421,14 @@ public static class FindingsEngine
                 Id = "sec.vbs_on",
                 Category = FindingCategory.Security,
                 Severity = FindingSeverity.Warning,
-                Title = "Включена безопасность на основе виртуализации (VBS)",
-                Detail = "Windows запускает систему поверх гипервизора. Даже без «Целостности памяти» " +
-                         "это стоит нескольких процентов в играх, упирающихся в процессор. " +
-                         "Важно: VBS нужен для WSL2, Hyper-V, Docker и «Песочницы Windows» — " +
-                         "если ты ими пользуешься, отключать нельзя.",
-                Recommendation = "Отключить, если не используешь WSL2 / Hyper-V / Docker",
+                Title = L10n.T("Включена безопасность на основе виртуализации (VBS)"),
+                Detail = L10n.T("Windows запускает систему поверх гипервизора. Даже без «Целостности памяти» ") +
+                         L10n.T("это стоит нескольких процентов в играх, упирающихся в процессор. ") +
+                         L10n.T("Важно: VBS нужен для WSL2, Hyper-V, Docker и «Песочницы Windows» — ") +
+                         L10n.T("если ты ими пользуешься, отключать нельзя."),
+                Recommendation = L10n.T("Отключить, если не используешь WSL2 / Hyper-V / Docker"),
                 FixTweakId = "sec.vbs_off",
-                ExpectedGain = "Обычно +3–10% FPS при упоре в CPU",
+                ExpectedGain = L10n.T("Обычно +3–10% FPS при упоре в CPU"),
                 ScoreWeight = 8
             });
         }
@@ -440,11 +440,11 @@ public static class FindingsEngine
                 Id = "gpu.hags_off",
                 Category = FindingCategory.Gpu,
                 Severity = FindingSeverity.Info,
-                Title = "Аппаратное ускорение планирования GPU выключено",
-                Detail = "HAGS перекладывает управление очередью кадров с процессора на видеокарту. " +
-                         "Эффект неоднозначный: на связке NVIDIA + Reflex обычно плюс, на части систем — минус. " +
-                         "Это ровно тот случай, когда нужно замерить до и после, а не верить гайдам.",
-                Recommendation = "Включить и сравнить замером",
+                Title = L10n.T("Аппаратное ускорение планирования GPU выключено"),
+                Detail = L10n.T("HAGS перекладывает управление очередью кадров с процессора на видеокарту. ") +
+                         L10n.T("Эффект неоднозначный: на связке NVIDIA + Reflex обычно плюс, на части систем — минус. ") +
+                         L10n.T("Это ровно тот случай, когда нужно замерить до и после, а не верить гайдам."),
+                Recommendation = L10n.T("Включить и сравнить замером"),
                 FixTweakId = "gpu.hags",
                 ScoreWeight = 0
             });
@@ -457,10 +457,10 @@ public static class FindingsEngine
                 Id = "win.game_mode_off",
                 Category = FindingCategory.Windows,
                 Severity = FindingSeverity.Info,
-                Title = "Игровой режим Windows выключен",
-                Detail = "В Windows 11 игровой режим стал полезным: он приоритизирует игру и откладывает " +
-                         "установку обновлений и перезагрузку драйверов во время игры.",
-                Recommendation = "Включить игровой режим",
+                Title = L10n.T("Игровой режим Windows выключен"),
+                Detail = L10n.T("В Windows 11 игровой режим стал полезным: он приоритизирует игру и откладывает ") +
+                         L10n.T("установку обновлений и перезагрузку драйверов во время игры."),
+                Recommendation = L10n.T("Включить игровой режим"),
                 FixTweakId = "win.game_mode_on",
                 ScoreWeight = 0
             });
@@ -474,9 +474,9 @@ public static class FindingsEngine
                 Category = FindingCategory.Windows,
                 Severity = FindingSeverity.Info,
                 Title = $"SystemResponsiveness = {t.SystemResponsiveness}",
-                Detail = "Доля процессорного времени, резервируемая под фоновые задачи. " +
-                         "Значение 10 оставляет играм чуть больше, чем стандартные 20.",
-                Recommendation = "Выставить 10",
+                Detail = L10n.T("Доля процессорного времени, резервируемая под фоновые задачи. ") +
+                         L10n.T("Значение 10 оставляет играм чуть больше, чем стандартные 20."),
+                Recommendation = L10n.T("Выставить 10"),
                 FixTweakId = "win.system_responsiveness",
                 ScoreWeight = 0
             });
@@ -489,10 +489,10 @@ public static class FindingsEngine
                 Id = "os.outdated",
                 Category = FindingCategory.Windows,
                 Severity = FindingSeverity.Warning,
-                Title = $"Старая сборка Windows ({r.Os.FullBuild})",
-                Detail = "Часть игровых оптимизаций (HAGS, современный flip-model вывод, DirectStorage) " +
-                         "появилась в более поздних сборках и здесь просто недоступна.",
-                Recommendation = "Обновить Windows",
+                Title = L10n.F("Старая сборка Windows ({0})", r.Os.FullBuild),
+                Detail = L10n.T("Часть игровых оптимизаций (HAGS, современный flip-model вывод, DirectStorage) ") +
+                         L10n.T("появилась в более поздних сборках и здесь просто недоступна."),
+                Recommendation = L10n.T("Обновить Windows"),
                 ScoreWeight = 6
             });
         }
@@ -517,12 +517,12 @@ public static class FindingsEngine
                 Id = "power.saver_plan",
                 Category = FindingCategory.Power,
                 Severity = FindingSeverity.Critical,
-                Title = $"Активна схема питания «{plan}»",
-                Detail = "Режим экономии энергии искусственно ограничивает частоты процессора " +
-                         "и агрессивно паркует ядра. В играх это прямая потеря производительности.",
-                Recommendation = "Переключиться на схему высокой производительности",
+                Title = L10n.F("Активна схема питания «{0}»", plan),
+                Detail = L10n.T("Режим экономии энергии искусственно ограничивает частоты процессора ") +
+                         L10n.T("и агрессивно паркует ядра. В играх это прямая потеря производительности."),
+                Recommendation = L10n.T("Переключиться на схему высокой производительности"),
                 FixTweakId = "power.ultimate_plan",
-                ExpectedGain = "На затронутых системах +10–30% FPS",
+                ExpectedGain = L10n.T("На затронутых системах +10–30% FPS"),
                 ScoreWeight = 15
             });
         }
@@ -533,10 +533,10 @@ public static class FindingsEngine
                 Id = "power.balanced_plan",
                 Category = FindingCategory.Power,
                 Severity = FindingSeverity.Info,
-                Title = "Активна сбалансированная схема питания",
-                Detail = "Для настольного ПК это разумный компромисс, но парковка ядер и переходы " +
-                         "энергосостояний PCIe дают лишние микрозадержки. Отдельная игровая схема их убирает.",
-                Recommendation = "Создать игровую схему питания",
+                Title = L10n.T("Активна сбалансированная схема питания"),
+                Detail = L10n.T("Для настольного ПК это разумный компромисс, но парковка ядер и переходы ") +
+                         L10n.T("энергосостояний PCIe дают лишние микрозадержки. Отдельная игровая схема их убирает."),
+                Recommendation = L10n.T("Создать игровую схему питания"),
                 FixTweakId = "power.ultimate_plan",
                 ScoreWeight = 0
             });
@@ -554,13 +554,13 @@ public static class FindingsEngine
                 Id = "input.mouse_accel_on",
                 Category = FindingCategory.Input,
                 Severity = FindingSeverity.Warning,
-                Title = "Включена акселерация мыши",
-                Detail = "«Повышенная точность установки указателя» меняет пройденное курсором расстояние " +
-                         "в зависимости от скорости движения руки. В шутерах это ломает мышечную память: " +
-                         "один и тот же взмах даёт разный поворот.",
-                Recommendation = "Отключить акселерацию",
+                Title = L10n.T("Включена акселерация мыши"),
+                Detail = L10n.T("«Повышенная точность установки указателя» меняет пройденное курсором расстояние ") +
+                         L10n.T("в зависимости от скорости движения руки. В шутерах это ломает мышечную память: ") +
+                         L10n.T("один и тот же взмах даёт разный поворот."),
+                Recommendation = L10n.T("Отключить акселерацию"),
                 FixTweakId = "input.mouse_accel_off",
-                ExpectedGain = "Стабильное прицеливание (на FPS не влияет)",
+                ExpectedGain = L10n.T("Стабильное прицеливание (на FPS не влияет)"),
                 ScoreWeight = 8
             });
         }
@@ -576,15 +576,15 @@ public static class FindingsEngine
                     Id = "input.low_polling_rate",
                     Category = FindingCategory.Input,
                     Severity = hz <= 125 ? FindingSeverity.Warning : FindingSeverity.Info,
-                    Title = $"Фактическая частота опроса мыши: {hz} Гц",
+                    Title = L10n.F("Фактическая частота опроса мыши: {0} Гц", hz),
                     Detail = hz <= 125
-                        ? "125 Гц — стандартное значение USB по умолчанию. Между отчётами проходит 8 мс: " +
-                          "при быстрых движениях курсор идёт заметными ступеньками. " +
-                          "Если мышь игровая, её частота почти наверняка сбита или ограничена подключением."
-                        : "Ниже 500 Гц. Для игровой мыши это мало — стоит проверить, во что она воткнута.",
-                    Recommendation = "Проверить: прямой порт на задней панели (не хаб и не разъём монитора), " +
-                                     "энергосбережение USB, настройку частоты в софте мыши",
-                    ExpectedGain = "Ровнее движение курсора и точнее прицеливание",
+                        ? L10n.T("125 Гц — стандартное значение USB по умолчанию. Между отчётами проходит 8 мс: ") +
+                          L10n.T("при быстрых движениях курсор идёт заметными ступеньками. ") +
+                          L10n.T("Если мышь игровая, её частота почти наверняка сбита или ограничена подключением.")
+                        : L10n.T("Ниже 500 Гц. Для игровой мыши это мало — стоит проверить, во что она воткнута."),
+                    Recommendation = L10n.T("Проверить: прямой порт на задней панели (не хаб и не разъём монитора), ") +
+                                     L10n.T("энергосбережение USB, настройку частоты в софте мыши"),
+                    ExpectedGain = L10n.T("Ровнее движение курсора и точнее прицеливание"),
                     ScoreWeight = 6
                 });
             }
@@ -597,10 +597,10 @@ public static class FindingsEngine
                 Id = "input.mouse_sensitivity_scaled",
                 Category = FindingCategory.Input,
                 Severity = FindingSeverity.Warning,
-                Title = $"Системная чувствительность мыши {r.Input.MouseSensitivity}/20 вместо 10/20",
-                Detail = "Любое значение кроме 10 (это 6-я позиция из 11 в панели управления) заставляет " +
-                         "Windows масштабировать отсчёты сенсора. Появляются пропуски и неравномерность движения.",
-                Recommendation = "Выставить 6/11 (значение 10) и регулировать чувствительность через DPI",
+                Title = L10n.F("Системная чувствительность мыши {0}/20 вместо 10/20", r.Input.MouseSensitivity),
+                Detail = L10n.T("Любое значение кроме 10 (это 6-я позиция из 11 в панели управления) заставляет ") +
+                         L10n.T("Windows масштабировать отсчёты сенсора. Появляются пропуски и неравномерность движения."),
+                Recommendation = L10n.T("Выставить 6/11 (значение 10) и регулировать чувствительность через DPI"),
                 FixTweakId = "input.mouse_sensitivity_1to1",
                 ScoreWeight = 6
             });
@@ -619,12 +619,12 @@ public static class FindingsEngine
                 Id = "bg.overlay_stack",
                 Category = FindingCategory.Background,
                 Severity = overlays.Count >= 5 ? FindingSeverity.Critical : FindingSeverity.Warning,
-                Title = $"Одновременно активны {Plural.Overlays(overlays.Count)}",
-                Detail = $"Обнаружены: {string.Join(", ", overlays)}. " +
-                         "Каждый оверлей встраивается в цепочку вывода кадра. Три и больше хуков подряд — " +
-                         "это уже не потеря средних FPS, а регулярные спайки frametime, те самые рывки.",
-                Recommendation = "Оставить один-два нужных, остальные отключить",
-                ExpectedGain = "Заметно ровнее 1% low",
+                Title = L10n.F("Одновременно активны {0}", Plural.Overlays(overlays.Count)),
+                Detail = L10n.F("Обнаружены: {0}. ", string.Join(", ", overlays)) +
+                         L10n.T("Каждый оверлей встраивается в цепочку вывода кадра. Три и больше хуков подряд — ") +
+                         L10n.T("это уже не потеря средних FPS, а регулярные спайки frametime, те самые рывки."),
+                Recommendation = L10n.T("Оставить один-два нужных, остальные отключить"),
+                ExpectedGain = L10n.T("Заметно ровнее 1% low"),
                 ScoreWeight = 10
             });
         }
@@ -644,11 +644,11 @@ public static class FindingsEngine
                 Id = "net.wifi_only",
                 Category = FindingCategory.Network,
                 Severity = FindingSeverity.Warning,
-                Title = "Подключение только по Wi-Fi",
-                Detail = "Wi-Fi даёт не столько высокий пинг, сколько нестабильный: джиттер и редкие потери " +
-                         "пакетов. В соревновательных играх это выглядит как «резина» и откаты позиции. " +
-                         "Кабель убирает это полностью.",
-                Recommendation = "Подключиться по Ethernet",
+                Title = L10n.T("Подключение только по Wi-Fi"),
+                Detail = L10n.T("Wi-Fi даёт не столько высокий пинг, сколько нестабильный: джиттер и редкие потери ") +
+                         L10n.T("пакетов. В соревновательных играх это выглядит как «резина» и откаты позиции. ") +
+                         L10n.T("Кабель убирает это полностью."),
+                Recommendation = L10n.T("Подключиться по Ethernet"),
                 ScoreWeight = 6
             });
         }
@@ -660,10 +660,10 @@ public static class FindingsEngine
                 Id = "net.slow_link",
                 Category = FindingCategory.Network,
                 Severity = FindingSeverity.Info,
-                Title = $"{n.ConnectionId ?? n.Name}: скорость линка {n.LinkSpeedMbps} Мбит/с",
-                Detail = "Линк договорился на скорость ниже гигабита. Обычно это старый или повреждённый кабель " +
-                         "(категории ниже 5e), либо порт роутера на 100 Мбит.",
-                Recommendation = "Проверить кабель и порт",
+                Title = L10n.F("{0}: скорость линка {1} Мбит/с", n.ConnectionId ?? n.Name, n.LinkSpeedMbps),
+                Detail = L10n.T("Линк договорился на скорость ниже гигабита. Обычно это старый или повреждённый кабель ") +
+                         L10n.T("(категории ниже 5e), либо порт роутера на 100 Мбит."),
+                Recommendation = L10n.T("Проверить кабель и порт"),
                 ScoreWeight = 0
             });
         }
@@ -686,12 +686,12 @@ public static class FindingsEngine
                 Id = "storage.games_on_hdd",
                 Category = FindingCategory.Storage,
                 Severity = FindingSeverity.Critical,
-                Title = $"{Plural.Games(onHdd.Count)} на жёстком диске",
-                Detail = $"Например: {string.Join(", ", top)}. " +
-                         "На HDD это долгие загрузки уровней и подгрузка текстур прямо в бою — " +
-                         "те самые фризы при забегании в новую локацию. При этом в системе есть SSD.",
-                Recommendation = "Перенести активные игры на SSD (Steam умеет это через «Переместить папку установки»)",
-                ExpectedGain = "Загрузки в 3–10 раз быстрее, заметно меньше фризов стриминга",
+                Title = L10n.F("{0} на жёстком диске", Plural.Games(onHdd.Count)),
+                Detail = L10n.F("Например: {0}. ", string.Join(", ", top)) +
+                         L10n.T("На HDD это долгие загрузки уровней и подгрузка текстур прямо в бою — ") +
+                         L10n.T("те самые фризы при забегании в новую локацию. При этом в системе есть SSD."),
+                Recommendation = L10n.T("Перенести активные игры на SSD (Steam умеет это через «Переместить папку установки»)"),
+                ExpectedGain = L10n.T("Загрузки в 3–10 раз быстрее, заметно меньше фризов стриминга"),
                 ScoreWeight = 12
             });
         }
@@ -710,10 +710,10 @@ public static class FindingsEngine
                     Id = "storage.games_crowding_system",
                     Category = FindingCategory.Storage,
                     Severity = FindingSeverity.Info,
-                    Title = $"{Plural.Games(onSystem)} на системном диске, где осталось {systemDrive.FreePercent:0}%",
-                    Detail = "Системному диску нужен запас: под файл подкачки, обновления Windows, " +
-                             "шейдерные кэши и сборку мусора SSD. Игры проще перенести, чем чистить систему.",
-                    Recommendation = "Перенести часть игр на другой накопитель",
+                    Title = L10n.F("{0} на системном диске, где осталось {1:0}%", Plural.Games(onSystem), systemDrive.FreePercent),
+                    Detail = L10n.T("Системному диску нужен запас: под файл подкачки, обновления Windows, ") +
+                             L10n.T("шейдерные кэши и сборку мусора SSD. Игры проще перенести, чем чистить систему."),
+                    Recommendation = L10n.T("Перенести часть игр на другой накопитель"),
                     ScoreWeight = 0
                 });
             }
@@ -731,13 +731,13 @@ public static class FindingsEngine
                 Id = "bg.heavy_startup",
                 Category = FindingCategory.Background,
                 Severity = FindingSeverity.Warning,
-                Title = $"В автозагрузке {Plural.With(r.Startup.HeavyItems.Count, "тяжёлая программа", "тяжёлых программы", "тяжёлых программ")}",
-                Detail = $"Обнаружены: {string.Join(", ", r.Startup.HeavyItems)}. " +
-                         "Софт для подсветки и лаунчеры держат фоновые службы, а некоторые " +
-                         "(iCUE, Armoury Crate) известны как источники скачков задержки DPC — " +
-                         "это микрофризы, которые не видно по среднему FPS.",
-                Recommendation = "Убрать из автозагрузки то, что не нужно постоянно",
-                ExpectedGain = "Ровнее frametime, быстрее загрузка системы",
+                Title = L10n.F("В автозагрузке {0}", Plural.With(r.Startup.HeavyItems.Count, L10n.T("тяжёлая программа"), L10n.T("тяжёлых программы"), L10n.T("тяжёлых программ"))),
+                Detail = L10n.F("Обнаружены: {0}. ", string.Join(", ", r.Startup.HeavyItems)) +
+                         L10n.T("Софт для подсветки и лаунчеры держат фоновые службы, а некоторые ") +
+                         L10n.T("(iCUE, Armoury Crate) известны как источники скачков задержки DPC — ") +
+                         L10n.T("это микрофризы, которые не видно по среднему FPS."),
+                Recommendation = L10n.T("Убрать из автозагрузки то, что не нужно постоянно"),
+                ExpectedGain = L10n.T("Ровнее frametime, быстрее загрузка системы"),
                 ScoreWeight = 6
             });
         }
@@ -748,10 +748,10 @@ public static class FindingsEngine
                 Id = "bg.many_startup",
                 Category = FindingCategory.Background,
                 Severity = FindingSeverity.Info,
-                Title = $"В автозагрузке {Plural.Programs(r.Startup.ItemCount)}",
-                Detail = "Само по себе это не бьёт по FPS, но удлиняет загрузку системы " +
-                         "и оставляет в памяти процессы, которые могут проснуться посреди игры.",
-                Recommendation = "Проредить автозагрузку",
+                Title = L10n.F("В автозагрузке {0}", Plural.Programs(r.Startup.ItemCount)),
+                Detail = L10n.T("Само по себе это не бьёт по FPS, но удлиняет загрузку системы ") +
+                         L10n.T("и оставляет в памяти процессы, которые могут проснуться посреди игры."),
+                Recommendation = L10n.T("Проредить автозагрузку"),
                 ScoreWeight = 0
             });
         }
@@ -768,9 +768,9 @@ public static class FindingsEngine
                 Id = "detox.harmful_tweak",
                 Category = FindingCategory.Windows,
                 Severity = FindingSeverity.Warning,
-                Title = "Найден вредный твик от стороннего «оптимизатора»",
+                Title = L10n.T("Найден вредный твик от стороннего «оптимизатора»"),
                 Detail = tweak,
-                Recommendation = "Вернуть штатное значение",
+                Recommendation = L10n.T("Вернуть штатное значение"),
                 ScoreWeight = 5
             });
         }

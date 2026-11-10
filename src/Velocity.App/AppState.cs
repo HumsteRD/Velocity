@@ -5,6 +5,7 @@ using Velocity.Core;
 using Velocity.Hardware;
 using Velocity.Tweaks;
 using Velocity.Tweaks.Games;
+using Velocity.Tweaks.Guides;
 
 namespace Velocity.App;
 
@@ -22,6 +23,10 @@ public sealed class AppState : INotifyPropertyChanged
 
     public TweakCatalog Catalog { get; private set; } = TweakCatalog.Load();
     public GameProfileEngine GameProfiles { get; private set; } = GameProfileEngine.Load();
+
+    private GuideCatalog? _guides;
+    /// <summary>Руководства плюс ручные пункты каталога твиков.</summary>
+    public GuideCatalog Guides => _guides ??= GuideCatalog.Load(Catalog);
 
     private HardwareReport? _report;
     public HardwareReport? Report

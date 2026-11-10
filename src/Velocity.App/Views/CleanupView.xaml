@@ -2,7 +2,7 @@
              xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:app="clr-namespace:Velocity.App"
-             Background="{StaticResource BgBase}">
+             Background="Transparent">
 
     <UserControl.Resources>
         <app:BoolToVisibilityConverter x:Key="BoolToVis"/>
@@ -18,15 +18,15 @@
 
         <Grid Grid.Row="0" Margin="28,24,28,16">
             <StackPanel>
-                <TextBlock Text="Очистка диска" Style="{StaticResource TextTitle}"/>
+                <TextBlock Text="{app:T 'Очистка диска'}" Style="{StaticResource TextTitle}"/>
                 <TextBlock x:Name="SubtitleText" Style="{StaticResource TextMuted}" Margin="0,4,0,0"
-                           Text="Нажми «Сканировать», чтобы посмотреть, чем занято место"/>
+                           Text="{app:T 'Нажми «Сканировать», чтобы посмотреть, чем занято место'}"/>
             </StackPanel>
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Top">
                 <ComboBox x:Name="DriveSelector" Width="80" Margin="0,0,8,0" VerticalContentAlignment="Center"
                           SelectionChanged="Drive_Changed"/>
                 <Button x:Name="ScanButton" Style="{StaticResource ButtonSecondary}"
-                        Content="Сканировать" Click="Scan_Click"/>
+                        Content="{app:T 'Сканировать'}" Click="Scan_Click"/>
             </StackPanel>
         </Grid>
 
@@ -37,7 +37,7 @@
                 <Border x:Name="UsagePanel" Style="{StaticResource Card}" Padding="20,18" Visibility="Collapsed">
                     <StackPanel>
                         <Grid Margin="0,0,0,16">
-                            <TextBlock Text="ЧЕМ ЗАНЯТО МЕСТО" Style="{StaticResource TextLabel}"/>
+                            <TextBlock Text="{app:T 'Чем занято место'}" Style="{StaticResource TextLabel}"/>
                             <TextBlock x:Name="UsageSummary" Style="{StaticResource TextMuted}"
                                        HorizontalAlignment="Right"/>
                         </Grid>
@@ -93,7 +93,7 @@
                 </Border>
 
                 <!-- ─────────── Что можно удалить ─────────── -->
-                <TextBlock x:Name="JunkHeader" Text="ЧТО МОЖНО УДАЛИТЬ" Style="{StaticResource TextLabel}"
+                <TextBlock x:Name="JunkHeader" Text="{app:T 'Что можно удалить'}" Style="{StaticResource TextLabel}"
                            Margin="2,24,0,10" Visibility="Collapsed"/>
 
                 <ItemsControl x:Name="JunkList">
@@ -141,7 +141,7 @@
                                                     <Style.Triggers>
                                                         <DataTrigger Binding="{Binding IsExpanded}" Value="True">
                                                             <Setter Property="Text" Value="&#xE70E;"/>
-                                                            <Setter Property="Foreground" Value="{StaticResource Accent}"/>
+                                                            <Setter Property="Foreground" Value="{StaticResource AccentInk}"/>
                                                         </DataTrigger>
                                                     </Style.Triggers>
                                                 </Style>
@@ -153,16 +153,16 @@
                                                 Visibility="{Binding IsExpanded, Converter={StaticResource BoolToVis}}">
                                         <Border Height="1" Background="{StaticResource BorderSubtle}" Margin="0,0,0,14"/>
 
-                                        <TextBlock Text="ЧТО ЭТО" Style="{StaticResource TextLabel}" Margin="0,0,0,5"/>
+                                        <TextBlock Text="{app:T 'Что это'}" Style="{StaticResource TextLabel}" Margin="0,0,0,5"/>
                                         <TextBlock Text="{Binding Description}" Style="{StaticResource TextBody}"
                                                    FontSize="{StaticResource FontSm}"/>
 
-                                        <TextBlock Text="ЧТО БУДЕТ ПОСЛЕ УДАЛЕНИЯ" Style="{StaticResource TextLabel}"
+                                        <TextBlock Text="{app:T 'Что будет после удаления'}" Style="{StaticResource TextLabel}"
                                                    Margin="0,14,0,5"/>
                                         <TextBlock Text="{Binding Consequence}" Style="{StaticResource TextBody}"
                                                    FontSize="{StaticResource FontSm}"/>
 
-                                        <TextBlock Text="ГДЕ ЭТО ЛЕЖИТ" Style="{StaticResource TextLabel}"
+                                        <TextBlock Text="{app:T 'Где это лежит'}" Style="{StaticResource TextLabel}"
                                                    Margin="0,14,0,5"/>
                                         <ItemsControl ItemsSource="{Binding Locations}">
                                             <ItemsControl.ItemTemplate>
@@ -181,20 +181,20 @@
 
                 <Border x:Name="EmptyState" Style="{StaticResource Card}" Padding="20,18" Visibility="Collapsed">
                     <StackPanel>
-                        <TextBlock Text="Мусора не найдено" Style="{StaticResource TextBase}" FontWeight="SemiBold"
+                        <TextBlock x:Name="EmptyTitle" Text="{app:T 'Мусора не найдено'}" Style="{StaticResource TextBase}" FontWeight="SemiBold"
                                    Foreground="{StaticResource Success}"/>
-                        <TextBlock Style="{StaticResource TextBody}" Margin="0,6,0,0"
-                                   Text="Временные файлы, кэши драйверов и остатки обновлений либо отсутствуют, либо занимают незначительное место."/>
+                        <TextBlock x:Name="EmptyText" Style="{StaticResource TextBody}" Margin="0,6,0,0" TextWrapping="Wrap"
+                                   Text="{app:T 'Временные файлы, кэши драйверов и остатки обновлений либо отсутствуют, либо занимают незначительное место.'}"/>
+                        <Button x:Name="SystemDriveButton" Content="{app:T 'Проверить системный диск'}" Style="{StaticResource ButtonCompact}"
+                                HorizontalAlignment="Left" Margin="0,12,0,0" Visibility="Collapsed" Click="SystemDrive_Click"/>
                     </StackPanel>
                 </Border>
 
                 <Border x:Name="HintPanel" Style="{StaticResource Card}" Padding="20,18" Margin="0,10,0,0">
                     <StackPanel>
-                        <TextBlock Text="ЧТО ПРОГРАММА НЕ УДАЛЯЕТ" Style="{StaticResource TextLabel}" Margin="0,0,0,10"/>
+                        <TextBlock Text="{app:T 'Что программа не удаляет'}" Style="{StaticResource TextLabel}" Margin="0,0,0,10"/>
                         <TextBlock Style="{StaticResource TextBody}" FontSize="{StaticResource FontSm}"
-                                   Text="Никаких личных файлов, документов, сохранений игр и паролей. Список путей закрытый и составлен вручную — программа не ищет «ненужные файлы» по своему усмотрению и не пользуется масками вроде «удалить всё из папки»."/>
-                        <TextBlock Style="{StaticResource TextBody}" FontSize="{StaticResource FontSm}" Margin="0,10,0,0"
-                                   Text="Точки восстановления Windows и теневые копии тоже не трогаются: это страховка системы, а не мусор."/>
+                                   Text="{app:T 'Личные файлы, сохранения игр, пароли и точки восстановления не затрагиваются. Список путей закрытый и составлен вручную.'}"/>
                     </StackPanel>
                 </Border>
 
@@ -207,13 +207,13 @@
             <Grid>
                 <StackPanel VerticalAlignment="Center">
                     <TextBlock x:Name="SelectionText" Style="{StaticResource TextBase}" FontWeight="SemiBold"
-                               Text="Ничего не выбрано"/>
+                               Text="{app:T 'Ничего не выбрано'}"/>
                     <TextBlock x:Name="SelectionHint" Style="{StaticResource TextMuted}" Margin="0,2,0,0"
-                               Text="Удаление необратимо — точки отката на файлы не распространяются"/>
+                               Text="{app:T 'Удаление необратимо — точки отката на файлы не распространяются'}"/>
                 </StackPanel>
 
                 <Button x:Name="CleanButton" Style="{StaticResource ButtonPrimary}"
-                        Content="Удалить выбранное" Click="Clean_Click" MinWidth="170"
+                        Content="{app:T 'Удалить выбранное'}" Click="Clean_Click" MinWidth="170"
                         HorizontalAlignment="Right" VerticalAlignment="Center" IsEnabled="False"/>
             </Grid>
         </Border>

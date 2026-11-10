@@ -59,7 +59,7 @@ public sealed class GameProfileEngine
     {
         try
         {
-            var parsed = JsonSerializer.Deserialize<List<GameProfile>>(read(), TweakCatalog.JsonOptions);
+            var parsed = JsonSerializer.Deserialize<List<GameProfile>>(L10n.TranslateJson(read()), TweakCatalog.JsonOptions);
             if (parsed is not null) _profiles.AddRange(parsed);
         }
         catch (Exception ex) { LoadErrors.Add($"{source}: {ex.Message}"); }
@@ -97,7 +97,7 @@ public sealed class GameProfileEngine
             var path = ResolvePath(tweak.File, match.Installed);
             if (path is null)
             {
-                files.Add(new ConfigFileEditor.EditResult(tweak.File, 0, false, "не удалось определить путь"));
+                files.Add(new ConfigFileEditor.EditResult(tweak.File, 0, false, L10n.T("не удалось определить путь")));
                 continue;
             }
 
@@ -119,7 +119,7 @@ public sealed class GameProfileEngine
                 if (!dryRun) NvidiaExecutor.Write(id, setting.Value);
                 drivers.Add($"{setting.Setting} = {setting.Value} — {setting.Why}");
             }
-            catch (Exception ex) { drivers.Add($"{setting.Setting}: ошибка — {ex.Message}"); }
+            catch (Exception ex) { drivers.Add(L10n.F("{0}: ошибка — {1}", setting.Setting, ex.Message)); }
         }
 
         // Советы фильтруем по железу: смысла показывать «снизь тени из-за 4 ГБ видеопамяти»

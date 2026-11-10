@@ -84,22 +84,15 @@ public sealed class TweakEngine(SystemFacts facts, SnapshotStore? store = null)
     public TweakStatus GetStatus(TweakDefinition tweak)
     {
         if (!Facts.MatchesAll(tweak.Requires))
-            return new TweakStatus(tweak, TweakState.NotApplicable, "не подходит этой конфигурации");
+            return new TweakStatus(tweak, TweakState.NotApplicable, L10n.T("не подходит этой конфигурации"));
 
-        if (tweak.Detect is null)
+        var detect = DetectActions(tweak);
+        if (detect.Count == 0)
             return new TweakStatus(tweak, TweakState.Unknown);
 
         try
         {
-            bool applied = tweak.Detect switch
-            {
-                RegistryAction reg => RegistryExecutor.Check(reg),
-                PowerCfgAction pc => CheckPower(pc),
-                DisplayModeAction dm => CheckDisplay(dm),
-                NvidiaProfileAction nv => CheckNvidia(nv),
-                JsonFileAction js => JsonFileExecutor.Check(js),
-                _ => false
-            };
+            bool applied = detect.All(CheckAction);
             return new TweakStatus(tweak, applied ? TweakState.Applied : TweakState.NotApplied);
         }
         catch (Exception ex)
@@ -107,6 +100,27 @@ public sealed class TweakEngine(SystemFacts facts, SnapshotStore? store = null)
             return new TweakStatus(tweak, TweakState.Unknown, ex.Message);
         }
     }
+
+    private static List<TweakAction> DetectActions(TweakDefinition tweak)
+    {
+        if (tweak.DetectAll) return [.. tweak.Apply.Where(TweakDefinition.IsDetectable)];
+        return tweak.Detect is { } single ? [single] : [];
+    }
+
+    private static bool CheckAction(TweakAction action) => action switch
+    {
+        RegistryAction reg => RegistryExecutor.Check(reg),
+        PowerCfgAction pc => CheckPower(pc),
+        DisplayModeAction dm => CheckDisplay(dm),
+        ServiceAction svc => CheckService(svc),
+        NvidiaProfileAction nv => CheckNvidia(nv),
+        JsonFileAction js => JsonFileExecutor.Check(js),
+        ScheduledTaskAction task => TaskExecutor.Check(task),
+        RegistryEachAction each => RegistryEachExecutor.Check(each),
+        DnsAction dns => DnsExecutor.Check(dns),
+        WindowsFeatureAction feature => FeatureExecutor.Check(feature),
+        _ => false
+    };
 
     public List<TweakStatus> GetStatuses(IEnumerable<TweakDefinition> tweaks)
         => [.. tweaks.Select(GetStatus)];
@@ -142,6 +156,19 @@ public sealed class TweakEngine(SystemFacts facts, SnapshotStore? store = null)
         });
     }
 
+    private static bool CheckService(ServiceAction action)
+    {
+        var expected = action.StartMode.ToLowerInvariant() switch
+        {
+            "auto" => 2,
+            "manual" => 3,
+            "disabled" => 4,
+            _ => -1
+        };
+        // Отсутствующая служба считается приведённой в нужное состояние: отключать нечего.
+        return ServiceExecutor.ReadStart(action.Name) is not { } current || current == expected;
+    }
+
     // ─────────────────────────── Применение ───────────────────────────
 
     public sealed record ApplyOptions
@@ -150,7 +177,7 @@ public sealed class TweakEngine(SystemFacts facts, SnapshotStore? store = null)
         public bool DryRun { get; init; }
         /// <summary>Игнорировать проверку активных античитов (для отладки).</summary>
         public bool IgnoreAntiCheat { get; init; }
-        public string Reason { get; init; } = "Применение оптимизаций";
+        public string Reason { get; init; } = L10n.T("Применение оптимизаций");
     }
 
     public sealed record ApplySession(
@@ -176,8 +203,8 @@ public sealed class TweakEngine(SystemFacts facts, SnapshotStore? store = null)
             if (active.Count > 0)
             {
                 return new ApplySession([], null, false,
-                    $"Запущен античит ({string.Join(", ", active)}). " +
-                    "Закрой игру и её лаунчер — менять настройки при активном античите небезопасно.");
+                    L10n.F("Запущен античит ({0}). ", string.Join(", ", active)) +
+                    L10n.T("Закрой игру и её лаунчер — менять настройки при активном античите небезопасно."));
             }
         }
 
@@ -198,7 +225,15 @@ public sealed class TweakEngine(SystemFacts facts, SnapshotStore? store = null)
 
         foreach (var tweak in list)
         {
-            var result = ApplyOne(tweak, session);
+            // Один сломанный твик не должен обрывать весь сеанс: иначе уже применённые
+            // до него изменения остались бы без отката до ручного восстановления точки.
+            ApplyResult result;
+            try { result = ApplyOne(tweak, session); }
+            catch (Exception ex)
+            {
+                result = new ApplyResult(tweak.Id, tweak.Title, ApplyOutcome.Failed,
+                    L10n.F("непредвиденная ошибка: {0}. Изменение сохранено в точке отката", ex.Message));
+            }
             results.Add(result);
             progress?.Report(result);
 
@@ -212,18 +247,18 @@ public sealed class TweakEngine(SystemFacts facts, SnapshotStore? store = null)
     private ApplyResult ApplyOne(TweakDefinition tweak, SnapshotSession session)
     {
         if (!Facts.MatchesAll(tweak.Requires))
-            return new ApplyResult(tweak.Id, tweak.Title, ApplyOutcome.Skipped, "не подходит этой конфигурации");
+            return new ApplyResult(tweak.Id, tweak.Title, ApplyOutcome.Skipped, L10n.T("не подходит этой конфигурации"));
 
         if (tweak.IsManual)
             return new ApplyResult(tweak.Id, tweak.Title, ApplyOutcome.Skipped,
-                "настройка выполняется вручную — программа её изменить не может");
+                L10n.T("настройка выполняется вручную — программа её изменить не может"));
 
         if (tweak.Apply.OfType<CommandAction>().Any() && tweak.Revert.Count == 0)
             return new ApplyResult(tweak.Id, tweak.Title, ApplyOutcome.Skipped,
-                "в каталоге не описан откат для команды — применять необратимое запрещено");
+                L10n.T("в каталоге не описан откат для команды — применять необратимое запрещено"));
 
         if (tweak.RequiresElevation && !IsElevated())
-            return new ApplyResult(tweak.Id, tweak.Title, ApplyOutcome.Skipped, "нужны права администратора");
+            return new ApplyResult(tweak.Id, tweak.Title, ApplyOutcome.Skipped, L10n.T("нужны права администратора"));
 
         // Снимок ДО любых изменений. Если снять не удалось — не применяем вовсе:
         // необратимое изменение хуже неприменённого твика.
@@ -245,7 +280,7 @@ public sealed class TweakEngine(SystemFacts facts, SnapshotStore? store = null)
         catch (Exception ex)
         {
             return new ApplyResult(tweak.Id, tweak.Title, ApplyOutcome.Failed,
-                $"не удалось сохранить прежнее состояние: {ex.Message}");
+                L10n.F("не удалось сохранить прежнее состояние: {0}", ex.Message));
         }
 
         var change = new TweakChange
@@ -263,21 +298,22 @@ public sealed class TweakEngine(SystemFacts facts, SnapshotStore? store = null)
         }
         catch (Exception ex)
         {
-            RollbackChange(change);
-            session.MarkReverted(tweak.Id);
-            return new ApplyResult(tweak.Id, tweak.Title, ApplyOutcome.Failed, ex.Message);
+            return new ApplyResult(tweak.Id, tweak.Title, ApplyOutcome.Failed,
+                TryRollback(change, session, tweak.Id) is { } rollbackError
+                    ? L10n.F("{0}. Вернуть прежнее значение не удалось ({1}) — оно сохранено в точке отката", ex.Message, rollbackError)
+                    : ex.Message);
         }
 
         // Проверяем, что изменение действительно вступило в силу.
-        if (tweak.Detect is not null && !tweak.RequiresReboot)
+        if (DetectActions(tweak).Count > 0 && !tweak.RequiresReboot)
         {
             var status = GetStatus(tweak);
             if (status.State == TweakState.NotApplied)
             {
-                RollbackChange(change);
-                session.MarkReverted(tweak.Id);
                 return new ApplyResult(tweak.Id, tweak.Title, ApplyOutcome.VerifyFailed,
-                    "изменение не подтвердилось, откатили");
+                    TryRollback(change, session, tweak.Id) is { } rollbackError
+                        ? L10n.F("изменение не подтвердилось, а откатить не удалось ({0}) — значение сохранено в точке отката", rollbackError)
+                        : L10n.T("изменение не подтвердилось, откатили"));
             }
         }
 
@@ -293,6 +329,10 @@ public sealed class TweakEngine(SystemFacts facts, SnapshotStore? store = null)
         ServiceAction svc => [ServiceExecutor.Capture(svc)],
         NvidiaProfileAction nv => [NvidiaExecutor.Capture(nv)],
         JsonFileAction js => [JsonFileExecutor.Capture(js)],
+        ScheduledTaskAction task => [TaskExecutor.Capture(task)],
+        RegistryEachAction each => RegistryEachExecutor.Capture(each),
+        DnsAction dns => DnsExecutor.Capture(dns),
+        WindowsFeatureAction feature => [FeatureExecutor.Capture(feature)],
         // Произвольные команды снимку не поддаются — для них твик обязан
         // задавать собственный блок revert.
         _ => []
@@ -309,7 +349,11 @@ public sealed class TweakEngine(SystemFacts facts, SnapshotStore? store = null)
             case CommandAction cmd: CommandExecutor.Apply(cmd); break;
             case NvidiaProfileAction nv: NvidiaExecutor.Apply(nv); break;
             case JsonFileAction js: JsonFileExecutor.Apply(js); break;
-            default: throw new NotSupportedException($"Действие {action.GetType().Name} не поддерживается");
+            case ScheduledTaskAction task: TaskExecutor.Apply(task); break;
+            case RegistryEachAction each: RegistryEachExecutor.Apply(each); break;
+            case DnsAction dns: DnsExecutor.Apply(dns); break;
+            case WindowsFeatureAction feature: FeatureExecutor.Apply(feature); break;
+            default: throw new NotSupportedException(L10n.F("Действие {0} не поддерживается", action.GetType().Name));
         }
     }
 
@@ -331,7 +375,7 @@ public sealed class TweakEngine(SystemFacts facts, SnapshotStore? store = null)
             {
                 RollbackChange(change);
                 change.Reverted = true;
-                results.Add(new ApplyResult(change.TweakId, change.TweakTitle, ApplyOutcome.Applied, "откачено"));
+                results.Add(new ApplyResult(change.TweakId, change.TweakTitle, ApplyOutcome.Applied, L10n.T("откачено")));
             }
             catch (Exception ex)
             {
@@ -346,10 +390,36 @@ public sealed class TweakEngine(SystemFacts facts, SnapshotStore? store = null)
         return results;
     }
 
+    /// <summary>
+    /// Откат одного твика внутри сеанса. Возвращает текст ошибки или null. Если откат не удался,
+    /// изменение НЕ помечается откатанным — оно остаётся в точке отката, и вернуть его можно позже.
+    /// </summary>
+    private static string? TryRollback(TweakChange change, SnapshotSession session, string tweakId)
+    {
+        try
+        {
+            RollbackChange(change);
+            session.MarkReverted(tweakId);
+            return null;
+        }
+        catch (Exception ex) { return ex.Message; }
+    }
+
     private static void RollbackChange(TweakChange change)
     {
-        // Значения тоже возвращаем в обратном порядке.
+        // Значения тоже возвращаем в обратном порядке. Ошибка на одном значении не мешает
+        // вернуть остальные; о ней сообщаем после того, как попробовали всё.
+        var errors = new List<string>();
         foreach (var record in Enumerable.Reverse(change.Previous))
+        {
+            try { RestoreRecord(record); }
+            catch (Exception ex) { errors.Add($"{record.Target}: {ex.Message}"); }
+        }
+        if (errors.Count > 0) throw new InvalidOperationException(string.Join("; ", errors));
+    }
+
+    private static void RestoreRecord(StateRecord record)
+    {
         {
             switch (record.Kind)
             {
@@ -359,6 +429,9 @@ public sealed class TweakEngine(SystemFacts facts, SnapshotStore? store = null)
                 case "service": ServiceExecutor.Restore(record); break;
                 case "nvidia": NvidiaExecutor.Restore(record); break;
                 case "json": JsonFileExecutor.Restore(record); break;
+                case "task": TaskExecutor.Restore(record); break;
+                case "dns": DnsExecutor.Restore(record); break;
+                case "feature": FeatureExecutor.Restore(record); break;
                 case "command":
                     if (record.Value is { } arguments)
                         CommandExecutor.Apply(new CommandAction { Executable = record.Target, Arguments = arguments });

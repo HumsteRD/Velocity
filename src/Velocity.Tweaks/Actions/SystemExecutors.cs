@@ -1,3 +1,4 @@
+using Velocity.Core;
 using System.Diagnostics;
 using System.Runtime.InteropServices;
 using System.Runtime.Versioning;
@@ -36,7 +37,12 @@ public static class PowerExecutor
         {
             case "duplicate":
                 // Схема Ultimate Performance скрыта, пока её не продублируешь.
-                Run($"-duplicatescheme {action.SchemeGuid}");
+                // Копии даём заранее известный GUID: без него powercfg выдаёт случайный,
+                // и активировать созданную схему следующим шагом было бы нечем.
+                if (action.TargetGuid is { } target && SchemeExists(target)) break;
+                Run(action.TargetGuid is null
+                    ? $"-duplicatescheme {action.SchemeGuid}"
+                    : $"-duplicatescheme {action.SchemeGuid} {action.TargetGuid}");
                 break;
 
             case "activate":
@@ -96,9 +102,54 @@ public static class PowerExecutor
             var path = $@"{ActiveSchemeKey}\{scheme}\{action.SubGroupGuid}\{action.SettingGuid}";
             using var key = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64)
                 .OpenSubKey(path);
-            return key?.GetValue("ACSettingIndex") is { } v ? System.Convert.ToInt32(v) : null;
+            if (key?.GetValue("ACSettingIndex") is { } v) return System.Convert.ToInt32(v);
+
+            // Значения, которые в схеме никто не менял, в её ключе не хранятся —
+            // действует встроенное умолчание. Его знает только сам powercfg.
+            // Без этого откат не знал бы, к чему возвращаться.
+            return QueryAc(scheme, action.SubGroupGuid, action.SettingGuid);
         }
         catch { return null; }
+    }
+
+    /// <summary>
+    /// Текущее значение «от сети» через powercfg /qh (h — включая скрытые параметры).
+    /// Текст вывода локализован, но числа в нём всегда шестнадцатеричные:
+    /// последние два 0x-значения — это индексы «от сети» и «от батареи».
+    /// </summary>
+    private static int? QueryAc(string scheme, string? sub, string? setting)
+    {
+        if (sub is null || setting is null) return null;
+        try
+        {
+            var psi = new ProcessStartInfo("powercfg.exe", $"/qh {scheme} {sub} {setting}")
+            {
+                CreateNoWindow = true,
+                UseShellExecute = false,
+                RedirectStandardOutput = true,
+                RedirectStandardError = true
+            };
+            using var proc = Process.Start(psi);
+            if (proc is null) return null;
+            var output = proc.StandardOutput.ReadToEnd();
+            proc.WaitForExit(5_000);
+
+            var hex = System.Text.RegularExpressions.Regex.Matches(output, @"0x([0-9a-fA-F]{8})");
+            if (hex.Count < 2) return null;
+            return System.Convert.ToInt32(hex[^2].Groups[1].Value, 16);
+        }
+        catch { return null; }
+    }
+
+    public static bool SchemeExists(string guid)
+    {
+        try
+        {
+            using var key = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64)
+                .OpenSubKey($@"{ActiveSchemeKey}\{guid}");
+            return key is not null;
+        }
+        catch { return false; }
     }
 
     internal static void Run(string arguments)
@@ -112,7 +163,7 @@ public static class PowerExecutor
         };
 
         using var proc = Process.Start(psi)
-            ?? throw new InvalidOperationException("powercfg не запустился");
+            ?? throw new InvalidOperationException(L10n.T("powercfg не запустился"));
         proc.WaitForExit(10_000);
     }
 }
@@ -264,7 +315,7 @@ public static class DisplayExecutor
 
         var result = ChangeDisplaySettingsEx(device, ref mode, IntPtr.Zero, CDS_UPDATEREGISTRY, IntPtr.Zero);
         if (result != DISP_CHANGE_SUCCESSFUL)
-            throw new InvalidOperationException($"Смена режима {device} не удалась (код {result})");
+            throw new InvalidOperationException(L10n.F("Смена режима {0} не удалась (код {1})", device, result));
     }
 
     private static IEnumerable<MonitorTarget> Targets(DisplayModeAction action)
@@ -294,8 +345,12 @@ public static class ServiceExecutor
             "auto" => 2,
             "manual" => 3,
             "disabled" => 4,
-            _ => throw new ArgumentException($"Неизвестный режим запуска: {action.StartMode}")
+            _ => throw new ArgumentException(L10n.F("Неизвестный режим запуска: {0}", action.StartMode))
         };
+
+        // Службы нет в этой сборке Windows (её вырезали или она не ставилась) —
+        // менять нечего. Это не ошибка, как и с отсутствующими задачами планировщика.
+        if (ReadStart(action.Name) is null) return;
         WriteStart(action.Name, start);
     }
 
@@ -304,7 +359,8 @@ public static class ServiceExecutor
         if (int.TryParse(record.Value, out var start)) WriteStart(record.Target, start);
     }
 
-    private static int? ReadStart(string name)
+    /// <summary>Читает тип запуска службы. null означает, что службы нет или доступ запрещён.</summary>
+    public static int? ReadStart(string name)
     {
         try
         {
@@ -319,7 +375,7 @@ public static class ServiceExecutor
     {
         using var key = RegistryKey.OpenBaseKey(RegistryHive.LocalMachine, RegistryView.Registry64)
             .OpenSubKey(KeyOf(name), writable: true)
-            ?? throw new InvalidOperationException($"Служба {name} не найдена");
+            ?? throw new InvalidOperationException(L10n.F("Служба {0} не найдена", name));
         key.SetValue("Start", start, RegistryValueKind.DWord);
     }
 }
